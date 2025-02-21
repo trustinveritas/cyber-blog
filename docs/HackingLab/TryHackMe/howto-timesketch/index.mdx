@@ -1,0 +1,353 @@
+---
+title: 'HOWTO - Timesketch'
+description: ""
+published: 2023-08-19
+redirect_from: 
+            - http://salucci.ch/?p=1345
+categories: "Uncategorized"
+hero: ../../../defaultHero.jpg
+---
+
+
+### Topic: **_Forensics_**
+
+
+
+
+
+#### Analyze a **_case of a suspect_** exfiltrating data from a Windows 8.1 machine.
+
+
+
+
+
+---
+
+
+
+
+
+#### Table of Content
+
+
+
+
+
+
+
+
+
+---
+
+
+
+
+
+#### Introduction
+
+
+
+
+
+**[Plaso](https://plaso.readthedocs.io/en/latest/)** is a tool which extracts a huge number of events from a disk or file artifact.
+
+
+
+
+
+**Plaso** has **_one huge downside_** though  
+_Given the file is a list of events, it is rather slow to analyze the data using it._
+
+
+
+
+
+This is where **[Timesketch](https://timesketch.org/)** comes into play  
+_**Timesketch** is a web frontend which allows multiple users to analyze an indexed database of events concurrently and do analysis on this data._
+
+
+
+
+
+##### Note
+
+
+
+
+
+A `.plaso` file is a sqlite3 DB.
+
+
+
+
+
+---
+
+
+
+
+
+#### Installation
+
+
+
+
+
+##### PLASO - Kali Linux
+
+
+
+
+
+```
+<strong>sudo apt update && sudo apt upgrade -y</strong>
+
+<strong>sudo apt install python3-pip python3-dev libssl-dev</strong>
+
+<strong>pip3 install plaso</strong>
+```
+
+
+
+
+
+##### PLASO - Ubuntu 22.04 LTS (jammy)
+
+
+
+
+
+```
+<strong>sudo add-apt-repository universe</strong>
+<strong>
+sudo add-apt-repository ppa:gift/stable</strong>
+
+<strong>sudo apt-get update
+sudo apt-get install plaso-tools</strong>
+```
+
+
+
+
+
+
+
+[More information...](https://plaso.readthedocs.io/en/latest/sources/user/Ubuntu-Packaged-Release.html)
+
+
+
+
+
+[Docker container...](https://plaso.readthedocs.io/en/latest/sources/user/Installing-with-docker.html)
+
+
+
+
+
+
+
+```
+<strong>> BONUS</strong>
+
+If you run the docker container make a alias for the plaso terminal
+```
+
+
+
+
+
+```
+alias plaso='docker run -t -i --entrypoint=/bin/bash -v /data:/data log2timeline/plaso'
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### TIMESKETCH
+
+
+
+
+
+```
+<strong>sudo apt update</strong>
+
+<strong>sudo apt install python3-pip python3-dev libffi-dev</strong>
+
+<strong>pip3 install timesketch</strong>
+```
+
+
+
+
+
+
+
+[More information...](https://timesketch.org/guides/admin/install/)
+
+
+
+
+
+[Docker container...](https://timesketch.org/guides/admin/install/)
+
+
+
+
+
+
+
+```
+<strong>> BONUS</strong>
+
+If you want to start the docker application after every reboot automatic.
+
+Make a << <strong>sudo nano /etc/systemd/system/docker-compose-app.service</strong> >> file.
+```
+
+
+
+
+
+```
+[Unit]
+Description=Docker Compose Application Service
+Requires=docker.service
+After=docker.service
+
+[Service]
+WorkingDirectory=/path/to/your/docker-compose/directory  # Change this to the timesketch path of your installation
+ExecStart=/usr/bin/docker compose up -d
+ExecStop=/usr/bin/docker compose down
+TimeoutStartSec=0
+Restart=always
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
+
+
+
+```
+> Find your docker installation
+
+<strong>sudo find / -name docker-compose.yml 2>/dev/null</strong>
+
+> Find docker-compose
+
+<strong>sudo find / -name docker-compose 2>/dev/null</strong>
+```
+
+
+
+
+
+```
+> Activate the service
+
+<strong>sudo systemctl enable docker-compose-app.service</strong>
+<strong>sudo systemctl start docker-compose-app.service</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### NGINX
+
+
+
+
+
+```
+> Find your docker nginx
+
+<strong>docker ps | grep nginx</strong>
+
+
+> Test nginx config
+
+<strong>docker exec <em>[CONTAINER_NAME_OR_ID]</em> nginx -t</strong>
+```
+
+
+
+
+
+```
+> Get Logs for a docker container
+
+<strong>docker logs <em>[CONTAINER_NAME_OR_ID]</em></strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### Data acquisiation
+
+
+
+
+
+The first step would normally be acquiring the data using plaso. The command used for this exercise is the following:
+
+
+
+
+
+```
+log2timeline.py windows-81.plaso /dev/sda
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### Timesketch
+
+
+
+
+
+```
+> Log in to the Interface
+> Click <strong>Blank sketch</strong> and enter a name
+> Add the Plaso file as a timeline and wait for the indexing to finish
+```
+
+
+
+
+
+##### USEFUL SEARCH QUERIES
+
+

