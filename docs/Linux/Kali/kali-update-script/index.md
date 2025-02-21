@@ -13,6 +13,21 @@ categories: ["Linux, Kali, Script, Update"]
 sudo apt install lolcat
 ```
 
+:::info
+If lolcat isn't found use the following commands:  
+
+```bash
+sudo apt update
+sudo apt install ruby -y
+sudo gem install lolcat
+```
+**Check if lolcat is installed:**
+
+```bash
+lolcat --help
+```
+:::
+
 2. **Create the update script:** Create a new bash script that performs the system update and colors the output with `lolcat`. Save the script under the name `update_kali.sh`, for example:
 
 ```bash
@@ -112,7 +127,7 @@ Copy & Paste in Nano (Linux Terminal)
 - **Use the mouse:** Simply select the text with your mouse and right-click to copy.
 - **Using keyboard shortcuts:**
     - Move the cursor to the beginning of the text you want to copy.
-    - Press `CTRL + 6` (or `CTRL + Shift + 6` in some terminals) to mark the text.
+    - Press `CTRL + 6` or (`CTRL + Shift + 6` in some terminals) to mark the text.
     - Move the cursor to the end of the text.
     - Press `ALT + 6` to copy the selected text.  
 
