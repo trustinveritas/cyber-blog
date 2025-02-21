@@ -76,7 +76,7 @@ Fortunately we can download some source files and aren't left alone in the dark.
 
 **routes/index.js**
 
-```
+```javascript
 <code class="language-javascript">[SNIP]
 router.get('/review', async (req, res, next) =&gt; {
     if(req.ip != '127.0.0.1') return res.redirect('/');
@@ -219,11 +219,11 @@ This code uses the Puppeteer library in Node.js to automate some browser interac
      This closes the browser.
    - **await db.migrate();**  
      This presumably runs some sort of database migration, but without further context it's hard to know exactly what it does.
-   - **module.exports = { purgeData };**  
+   - **module.exports = purgeData;**  
      This exports the purgeData function so it can be used in other modules.
 
 **Methodology**  
-As a user, we can submit stories in the form of text. When we upload a valid story from **POST /api/submit** it will get **reviewed by a bot** using **purgeData() method**. The **bot is a headless chromium browser**, that visits every post we make, and then **deletes db**. The bot **sets a cookie with a flag we need to obtain**.
+As a user, we can submit stories in the form of text. When we upload a valid story from **POST /api/submit** it will get **reviewed by a bot** using **`purgeData() method`**. The **bot is a headless chromium browser**, that visits every post we make, and then **deletes db**. The bot **sets a cookie with a flag we need to obtain**.
 
 \> The obvious thing here is to use XSS and steal the cookie. But this is not so easy because the app has a CSP defense in-place.
 

