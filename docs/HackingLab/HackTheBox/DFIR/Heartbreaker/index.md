@@ -5,9 +5,8 @@ Delicate situation alert! The customer has just been alerted about concerning re
 
 ## Evidence
 
-| What | Evidence | Where |
-|------|----------|-------|
-|
+ | Date	      | Time of the event | hostname    | event description                   | data source        |
+ |------------|-------------------|-------------|-------------------------------------|--------------------|
 
 ---
 ## Files
