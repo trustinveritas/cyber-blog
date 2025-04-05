@@ -17,3 +17,38 @@ hola:
   label: Hola
   permalink: /hola
   description: Hola tag description
+
+SOC-Analyst:
+  label: SOC-Analyst
+  permalink: /soc-analyst
+  description: SOC Analyst tag description
+
+SOC:
+  label: SOC
+  permalink: /soc
+  description: Security Operations Center tag description
+
+CrowdStrike:
+  label: CrowdStrike
+  permalink: /crowdstrike
+  description: CrowdStrike tag description
+
+Falcon:
+  label: Falcon
+  permalink: /falcon
+  description: Falcon tag description
+
+EDR:
+  label: EDR
+  permalink: /edr
+  description: Endpoint Detection & Response tag description
+
+trustinveritas:
+  label: trustinveritas
+  permalink: /trustinveritas
+  description: trustinveritas tag description
+
+alessandro:
+  label: alessandro
+  permalink: /alessandro
+  description: Alessandro tag description
