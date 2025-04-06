@@ -2,7 +2,7 @@
 title: "Analyzing Evil With Sysmon & Event Logs"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
-published: 2025-04-055
+published: 2025-04-05
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
