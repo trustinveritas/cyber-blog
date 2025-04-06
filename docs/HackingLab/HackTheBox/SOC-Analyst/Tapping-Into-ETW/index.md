@@ -16,9 +16,14 @@ categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 
 ### [SANS Hunt Evil Poster](https://sansorg.egnyte.com/dl/WFdH1hHnQI)
 
-<iframe src="/pdfs/SANS_DFPS_FOR508_v4.11_0624.pdf" width="100%" height="700px" style="border: none;">
-    Dieses Dokument kann leider nicht angezeigt werden.
-    <a href="/pdfs/SANS_DFPS_FOR508_v4.11_0624.pdf">PDF öffnen</a>
+<iframe
+  src="/pdfs/SANS_DFPS_FOR508_v4.11_0624.pdf"
+  width="100%"
+  height="700px"
+  style={{ border: 'none' }}
+>
+  Dieses Dokument kann leider nicht angezeigt werden.
+  <a href="/pdfs/SANS_DFPS_FOR508_v4.11_0624.pdf">PDF öffnen</a>
 </iframe>
 
 ---
