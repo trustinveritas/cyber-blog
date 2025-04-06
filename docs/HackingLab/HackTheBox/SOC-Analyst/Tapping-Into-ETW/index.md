@@ -58,7 +58,7 @@ c:\Tools\SilkETW_SilkService_v8\v8\SilkETW>SilkETW.exe -t user -pn Microsoft-Win
 
 The `etw.json` file (that includes data from the `Microsoft-Windows-Kernel-Process` provider) seems to contain information about `powershell.exe` being the one who created `cmd.exe`.
 
-![SilkETW-2](imag/SilkETW-2.png)
+![SilkETW-2](img/SilkETW-2.png)
 
 It should be noted that `SilkETW event logs` can be **ingested** and **viewed by** `Windows Event Viewer` through `SilkService` to provide us with deeper and more extensive visibility into the actions performed on a system.
 
