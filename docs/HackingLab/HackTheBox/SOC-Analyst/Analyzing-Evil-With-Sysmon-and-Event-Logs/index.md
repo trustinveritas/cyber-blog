@@ -1,12 +1,12 @@
 ---
-title: "Analyzing Evil With Sysmon & Event Logs"
+title: "4. Analyzing Evil With Sysmon & Event Logs"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-05
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Analyzing Evil With Sysmon & Event Logs
+# 4. Analyzing Evil With Sysmon & Event Logs
 
 In our pursuit of robust cybersecurity, it is crucial to understand how to identify and analyze malicious events effectively.  
 Building upon our previous exploration of benign events, we will now delve into the realm of malicious activities and discover techniques for detection.

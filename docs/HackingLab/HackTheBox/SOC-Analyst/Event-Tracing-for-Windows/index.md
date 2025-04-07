@@ -1,12 +1,12 @@
 ---
-title: "Event Tracing for Windows (ETW)"
+title: "5. Event Tracing for Windows (ETW)"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-06
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Event Tracing for Windows (ETW)
+# 5. Event Tracing for Windows (ETW)
 
 In the realm of effective threat detection and incident response, we often find ourselves relying on the limited log data at our disposal. However, this approach falls short of fully harnessing the immense wealth of information that can be derived from **the powerful resource** known as `Event Tracing for Windows (ETW)`. Unfortunately, this oversight can be attributed to a lack of awareness and appreciation for **the comprehensive and intricate insights** that `ETW` can offer.
 

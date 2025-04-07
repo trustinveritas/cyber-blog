@@ -1,12 +1,12 @@
 ---
-title: "Threat Hunting Glossary"
+title: "11. Threat Hunting Glossary"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-07
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Threat Hunting Glossary
+# 11. Threat Hunting Glossary
 
 **Within the domain of cybersecurity and threat hunting, several crucial terms and concepts play a pivotal role. Here's an enriched understanding of these:**
 

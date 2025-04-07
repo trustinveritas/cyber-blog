@@ -1,12 +1,12 @@
 ---
-title: "The Threat Hunting Process"
+title: "10. The Threat Hunting Process"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-07
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# The Threat Hunting Process
+# 10. The Threat Hunting Process
 
 - `Setting the Stage`  
 The initial phase is all about planning and preparation. It includes laying out clear targets based on a deep understanding of the threat landscape, our business's critical requirements, and our threat intelligence insights. The preparation phase also encompasses making certain our environment is ready for effective threat hunting, which might involve **enabling extensive logging across our systems** and **ensuring threat hunting tools**, such as `SIEM`, `EDR`, `IDS`, are correctly set up. Additionally, we **stay informed about the most recent cyber threats** and **familiarize ourselves with threat actor profiles**.

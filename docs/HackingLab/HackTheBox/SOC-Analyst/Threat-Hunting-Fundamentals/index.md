@@ -1,12 +1,12 @@
 ---
-title: "Threat Hunting Fundamentals"
+title: "9. Threat Hunting Fundamentals"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-07
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Threat Hunting Definition
+# 9. Threat Hunting Definition
 
 The **median duration between** an **actual security breach** and **its detection**, otherwise termed "`dwell time`", is **usually several weeks**, `if not months`. This implies a potential `adversarial presence within a network for a span approaching three weeks`, a duration that can be significantly impactful.
 

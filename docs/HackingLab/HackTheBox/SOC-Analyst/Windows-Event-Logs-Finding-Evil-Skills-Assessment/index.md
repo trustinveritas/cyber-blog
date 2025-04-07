@@ -1,12 +1,12 @@
 ---
-title: "Windows Event Logs & Finding Evil - Skills Assessment"
+title: "8. Windows Event Logs & Finding Evil - Skills Assessment"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-06
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Windows Event Logs & Finding Evil - Skills Assessment
+# 8. Windows Event Logs & Finding Evil - Skills Assessment
 
 To keep you sharp, your SOC manager has assigned you the task of **analyzing older attack logs and providing answers** to specific questions.
 

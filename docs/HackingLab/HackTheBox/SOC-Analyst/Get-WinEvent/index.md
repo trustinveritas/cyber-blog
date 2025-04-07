@@ -1,12 +1,12 @@
 ---
-title: "Get-WinEvent"
+title: "7. Get-WinEvent"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-06
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Get-WinEvent
+# 7. Get-WinEvent
 
 Understanding the importance of mass analysis of `Windows Event Logs` and `Sysmon logs` is pivotal in the realm of cybersecurity, especially in `Incident Response (IR)` and `threat hunting scenarios`. These **logs hold invaluable information** about `the state of your systems`, `user activities`, `potential threats`, `system changes`, and `troubleshooting information`. However, these logs can also be voluminous and unwieldy. For large-scale organizations, it's not uncommon to generate millions of logs each day. Hence, to distill useful information from these logs, we require efficient tools and techniques to analyze these logs en masse.
 

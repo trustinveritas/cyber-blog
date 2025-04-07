@@ -1,12 +1,12 @@
 ---
-title: "Tapping Into ETW"
+title: "6. Tapping Into ETW"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-06
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Tapping Into ETW
+# 6. Tapping Into ETW
 
 ## Detection Example 1: Detecting Strange Parent-Child Relationships
 
