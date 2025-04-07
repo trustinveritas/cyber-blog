@@ -664,7 +664,6 @@ Most activity | Related to `RuntimeBroker.exe`, `svchost.exe`, `dllhost.exe`, `c
 `dmclient.exe` & `mousocoreworker.exe` | **Normal Windows telemetry/update clients**
 All parent/child chains | Appear to be standard system behavior or trusted update/task processes
 
-
 ### 6. By examining the logs located in the "C:\Logs\StrangePPID" directory, determine a process that was used to temporarily execute code based on a strange parent-child relationship. Enter the process name as your answer. Answer format: _.exe
 
 > WerFault.exe
