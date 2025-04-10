@@ -1716,7 +1716,7 @@ function Add-TcpTransport {
 #### Search for Powershell without *.ps1 | Was loaded into memory | Event ID 4104
 
 ```sql
-
+event.code:4104 AND NOT winlog.event_data.ScriptBlockText:".ps1"
 ```
 
 ```txt
