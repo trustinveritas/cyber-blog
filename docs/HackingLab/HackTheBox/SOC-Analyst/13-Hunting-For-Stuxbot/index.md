@@ -1022,7 +1022,7 @@ The attacker can now:
 
 ### 3. Some PowerShell code has been loaded into memory that scans/targets network shares. Leverage the available PowerShell logs to identify from which popular hacking tool this code derives. Answer format (one word): P____V___
 
-> 
+> PowerView
 
 #### Microsoft-Windows-PowerShell/Operational - [Event ID 4104](https://research.splunk.com/endpoint/d6f2b006-0041-11ec-8885-acde48001122/)
 
