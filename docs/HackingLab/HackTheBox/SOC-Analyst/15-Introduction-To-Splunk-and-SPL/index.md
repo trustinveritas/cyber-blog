@@ -6,6 +6,8 @@ published: 2025-04-15
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
+import RevealFlag from '@site/src/components/RevealFlag';
+
 # Understanding Log Sources & Investigating with Splunk
 
 ## What Is Splunk?
@@ -385,6 +387,232 @@ Splunk can ingest a wide variety of data sources. We classify these data sources
 | eventcount summarize=false index=* | table index
 ```
 
-```sql
+This query uses `eventcount` to count events in all indexes, then `summarize=false` is used to display counts for each index separately, and finally, the `table` command is used to present the data in tabular form.
 
+---
+
+```sql
+| metadata type=sourcetypes
 ```
+
+This search uses the `metadata` command, which provides us with various statistics about specified indexed fields. Here, we're focusing on `sourcetypes`. The result is a list of all `sourcetypes` in our Splunk environment, along with additional metadata such as the first time a source type was seen (`firstTime`), the last time it was seen (`lastTime`), and the number of hosts (`totalCount`).
+
+---
+
+For a simpler view, we can use the following search.
+
+```sql
+| metadata type=sourcetypes index=* | table sourcetype
+```
+
+Here, the `metadata` command retrieves metadata about the data in our indexes. The `type=sourcetypes` argument tells Splunk to return metadata about sourcetypes. The `table` command is used to present the data in tabular form.
+
+---
+
+```sql
+| metadata type=sources index=* | table source
+```
+
+This command returns a list of all data sources in the Splunk environment.
+
+---
+
+Once we know our source types, we can investigate the kind of data they contain. Let's say we are interested in a sourcetype named `WinEventLog:Security`, we can use the table command to present the raw data as follows.
+
+```sql
+sourcetype="WinEventLog:Security" | table _raw
+```
+
+The `table` command generates a table with the specified fields as columns. Here, `_raw` represents the raw event data. This command will return the raw data for the specified source type.
+
+Splunk automatically extracts a set of default fields for every event it indexes, but it can also extract additional fields depending on the source type of the data. To see all fields available in a specific source type, we can use the `fields` command.
+
+---
+
+```sql
+sourcetype="WinEventLog:Security" | table *
+```
+
+This command generates a table with all fields available in the `WinEventLog:Security` sourcetype. However, be cautious, as the use of `table *` can result in a very wide table if our events have a large number of fields. This may not be visually practical or effective for data analysis.
+
+A better approach is to identify the fields you are interested in using the `fields` command as mentioned before, and then specifying those field names in the `table` command.
+
+**Example**
+
+```sql
+sourcetype="WinEventLog:Security" | fields Account_Name, EventCode | table Account_Name, EventCode
+```
+
+---
+
+If we want to see a list of field names only, without the data, we can use the `fieldsummary` command instead.
+
+```sql
+sourcetype="WinEventLog:Security" | fieldsummary
+```
+
+This search will return a table that includes every field found in the events returned by the search (across the sourcetype we've specified). The table includes several columns of information about each field:
+
+- `field`  
+The name of the field.
+
+- `count`  
+The number of events that contain the field.
+
+- `distinct_count`  
+The number of distinct values in the field.
+
+- `is_exact`  
+Whether the count is exact or estimated.
+
+- `max`  
+The maximum value of the field.
+
+- `mean`  
+The mean value of the field.
+
+- `min`  
+The minimum value of the field.
+
+- `numeric_count`  
+The number of numeric values in the field.
+
+- `stdev`  
+The standard deviation of the field.
+
+- `values`  
+Sample values of the field.
+
+We may also see:
+
+- `modes`  
+The most common values of the field.
+
+- `numBuckets`  
+The number of buckets used to estimate the distinct count.
+
+:::info[Note]
+The values provided by the `fieldsummary` command are calculated based on the events returned by our search. So if we want to see all fields within a specific `sourcetype`, we need to make sure our time range is large enough to capture all possible fields.
+:::
+
+```sql
+index=* sourcetype=* | bucket _time span=1d | stats count by _time, index, sourcetype | sort - _time
+```
+
+Sometimes, we might want to know how events are distributed over time. This query retrieves all data (`index=* sourcetype=*`), then `bucket` command is used to group the events based on the `_time` field into 1-day buckets. The `stats` command then counts the number of events for each day (`_time`), `index`, and `sourcetype`. Lastly, the sort command sorts the result in descending order of `_time`.
+
+---
+
+```sql
+index=* sourcetype=* | rare limit=10 index, sourcetype
+```
+
+The `rare` command can help us identify uncommon event types, which might be indicative of abnormal behavior. This query retrieves all data and finds the 10 rarest combinations of indexes and sourcetypes.
+
+```sql
+index="main" | rare limit=20 useother=f ParentImage
+```
+
+This command displays the 20 least common values of the `ParentImage` field.
+
+---
+
+```sql
+index=* sourcetype=* | fieldsummary | where count < 100 | table field, count, distinct_count
+```
+
+A more complex query can provide a detailed summary of fields. This search shows a summary of all fields (`fieldsummary`), filters out fields that appear in less than 100 events (`where count < 100`), and then displays a table (`table`) showing the field name, total count, and distinct count.
+
+```sql
+index=* | sistats count by index, sourcetype, source, host
+```
+
+We can also use the `sistats` command to explore event diversity. This command counts the number of events per index, sourcetype, source, and host, which can provide us a clear picture of the diversity and distribution of our data.
+
+---
+
+```sql
+index=* sourcetype=* | rare limit=10 field1, field2, field3
+```
+
+The `rare` command can also be used to find uncommon combinations of field values. Replace `field1`, `field2`, `field3` with the fields of interest. This command will display the 10 rarest combinations of these fields.
+
+By combining the above SPL commands and techniques, we can explore and understand the types of data source, the data they contain, and the fields within them. This understanding is the foundation upon which we build effective searches, reports, alerts, and dashboards in Splunk.
+
+Lastly, remember to follow your organization's data governance policies when exploring data and source types to ensure you're compliant with all necessary privacy and security guidelines.
+
+### Data and field identification approach 2: Leverage Splunk's User Interface
+
+When using the `Search & Reporting` application's user interface, identifying the available data source types, the data they contain, and the fields within them becomes a task that involves interacting with various sections of the UI. Let's examine how we can effectively use the Splunk Web interface to identify these elements.
+
+- `Data Sources`  
+The first thing we want to identify is our data sources. We can do this by navigating to the `Settings` menu, which is usually located on the top right corner of our Splunk instance. In the dropdown, we'll find `Data inputs`. By clicking on `Data inputs`, we'll see a list of various data input methods, including files & directories, HTTP event collector, forwarders, scripts, and many more. These represent the various sources through which data can be brought into Splunk. Clicking into each of these will give us an overview of the data sources being utilized.
+
+- `Data (Events)`  
+Now, let's move on to identifying the data itself, in other words, the events. For this, we'll want to navigate to the `Search & Reporting` app. By exploring the events in the `Fast` mode, we can quickly scan through our data. The `Verbose` mode, on the other hand, lets us dive deep into each event's details, including its raw event data and all the fields that Splunk has extracted from it.
+
+![Search-Reporting](img/Search-Reporting.png)
+
+In the search bar, we could simply put `*` and hit search, which will bring up all the data that we have indexed. However, this is usually a massive amount of data, and it might not be the most efficient way to go about it. A better approach might be to leverage the time picker and select a smaller time range (let's be careful while doing so though to not miss any important/useful historic logs).
+
+---
+
+- `Fields`  
+Lastly, to identify the fields in our data, let's look at an event in detail. We can click on any event in our search results to expand it.
+
+![Search-Reporting-2](img/Search-Reporting-2.png)
+
+We can also see on the left hand side of the "**Search & Reporting**" application two categories of fields: `Selected Fields` and `Interesting Fields`. `Selected Fields` are fields that are always shown in the events (like `host`, `source`, and `sourcetype`), while `Interesting Fields` are those that appear in at least 20% of the events. By clicking `All fields`, we can see all the fields present in our events.
+
+![Search-Reporting-3](img/Search-Reporting-3.png)
+
+---
+
+- `Data Models`  
+Data Models provide an organized, hierarchical view of our data, simplifying complex datasets into understandable structures. They're designed to make it easier to create meaningful reports, visualizations, and dashboards without needing a deep understanding of the underlying data sources or the need to write complex SPL queries. Here is how we can use the Data Models feature to identify and understand our data:
+
+  - `Accessing Data Models`  
+  To access Data Models, we click on the `Settings` tab on the top right corner of the Splunk Web interface. Then we select `Data Models` under the `Knowledge` section. This will lead us to the Data Models management page. **<-- If it appears empty, please execute a search and navigate to the Data Models page again.**
+
+  - `Understanding Existing Data Models`  
+  On the Data Models management page, we can see a list of available Data Models. These might include models created by ourselves, our team, or models provided by Splunk Apps. Each Data Model is associated with a specific app context and is built to describe the structured data related to the app's purpose.
+
+  - `Exploring Data Models`  
+  By clicking on the name of a Data Model, we are taken to the `Data Model Editor`. This is where the true power of Data Models lies. Here, we can view the hierarchical structure of the data model, which is divided into `objects`. Each object represents a specific part of our data and contains `fields` that are relevant to that object.
+
+![Data-Models](img/Data-Models.png)
+
+#### Example
+  
+If we have a Data Model that describes web traffic, we might see objects like `Web Transactions`, `Web Errors`, etc. Within these objects, we'll find fields like `status`, `url`, `user`, etc.
+
+---
+
+- `Pivots`  
+Pivots are an extremely powerful feature in Splunk that allows us to create complex reports and visualizations without writing SPL queries. They provide an interactive, drag-and-drop interface for defining and refining our data reporting criteria. As such, they're also a fantastic tool for identifying and exploring the available data and fields within our Splunk environment. To start with Pivots to identify available data and fields, we can use the `Pivot` button that appears when we're browsing a particular data model in the `Data Models` page.
+
+![Pivot](img/Pivot.png)
+
+![Pivot-2](img/Pivot-2.png)
+
+## Practical Exercises
+
+### Questions
+
+### 1. Open the "Search & Reporting" application, and find through an SPL search against all data the account name with the highest amount of Kerberos authentication ticket requests. Enter it as your answer.
+
+<RevealFlag>
+flag{docusaurus_ctf_flag}
+</RevealFlag>
+
+### 2. Open the "Search & Reporting" application, and find through an SPL search against all 4624 events the count of distinct computers accessed by the account name SYSTEM. Enter it as your answer.
+
+<RevealFlag>
+flag{docusaurus_ctf_flag}
+</RevealFlag>
+
+### 3. Open the "Search & Reporting" application, and find through an SPL search against all 4624 events the account name that made the most login attempts within a span of 10 minutes. Enter it as your answer.
+
+<RevealFlag>
+flag{docusaurus_ctf_flag}
+</RevealFlag>
