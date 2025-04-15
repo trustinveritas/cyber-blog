@@ -6,6 +6,8 @@ published: 2025-04-09
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
+import RevealFlag from '@site/src/components/RevealFlag';
+
 # Hunting For Stuxbot
 
 ## Threat Intelligence Report: Stuxbot
