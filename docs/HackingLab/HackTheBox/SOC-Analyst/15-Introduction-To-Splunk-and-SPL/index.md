@@ -601,12 +601,12 @@ Pivots are an extremely powerful feature in Splunk that allows us to create comp
 
 ### 1. Open the "Search & Reporting" application, and find through an SPL search against all data the account name with the highest amount of Kerberos authentication ticket requests. Enter it as your answer.
 
-<RevealFlag> flag{docusaurus_ctf_flag} </RevealFlag>
+<RevealFlag> `flag{docusaurus_ctf_flag}` </RevealFlag>
 
 ### 2. Open the "Search & Reporting" application, and find through an SPL search against all 4624 events the count of distinct computers accessed by the account name SYSTEM. Enter it as your answer.
 
-<RevealFlag> flag{docusaurus_ctf_flag} </RevealFlag>
+<RevealFlag> `flag{docusaurus_ctf_flag}` </RevealFlag>
 
 ### 3. Open the "Search & Reporting" application, and find through an SPL search against all 4624 events the account name that made the most login attempts within a span of 10 minutes. Enter it as your answer.
 
-<RevealFlag> flag{docusaurus_ctf_flag} </RevealFlag>
+<RevealFlag> `flag{docusaurus_ctf_flag}` </RevealFlag>
