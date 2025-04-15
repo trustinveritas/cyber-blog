@@ -599,14 +599,76 @@ Pivots are an extremely powerful feature in Splunk that allows us to create comp
 
 ### Questions
 
+---
+
 ### 1. Open the "Search & Reporting" application, and find through an SPL search against all data the account name with the highest amount of Kerberos authentication ticket requests. Enter it as your answer.
 
-<RevealFlag>{`svc-sql1`}</RevealFlag>
+<RevealFlag>{`waldo`}</RevealFlag>
+
+```sql
+index=* EventCode=4768 Account_Name!="-" 
+| stats count by Account_Name 
+| sort -count 
+| head 1
+```
+
+#### 🔍 Explanation
+
+Component | Purpose
+----------|----------
+`EventCode=4768` | Windows Security **log event ID for Kerberos TGT requests**
+`Account_Name!="-”` | Filters out invalid or empty account names
+`stats count by Account_Name` | Counts how many TGT requests each account made
+`sort -count` | Sorts the result descending by count
+`head 1` | Shows only the top account with the most requests
+
+---
 
 ### 2. Open the "Search & Reporting" application, and find through an SPL search against all 4624 events the count of distinct computers accessed by the account name SYSTEM. Enter it as your answer.
 
-<RevealFlag>{`svc-sql1`}</RevealFlag>
+<RevealFlag>{`10`}</RevealFlag>
+
+```sql
+index=* EventCode=4624 Account_Name="SYSTEM" 
+| stats dc(ComputerName) as distinct_computers
+```
+
+#### 🔍 Explanation
+
+Component | Purpose
+----------|----------
+`EventCode=4624` | Filters for **successful logon** events
+`Account_Name="SYSTEM"` | Limits results to `SYSTEM` account logons
+`dc(ComputerName)` | `dc = distinct count`, counts how many unique ComputerName values
+`as distinct_computers` | Renames the resulting field to something readable
+
+---
 
 ### 3. Open the "Search & Reporting" application, and find through an SPL search against all 4624 events the account name that made the most login attempts within a span of 10 minutes. Enter it as your answer.
 
-<RevealFlag>{`svc-sql1`}</RevealFlag>
+<RevealFlag>{`aparsa`}</RevealFlag>
+
+```sql
+index=* EventCode=4624
+| eval User=coalesce(TargetUserName, Account_Name)
+| where isnotnull(User) AND NOT like(User, "%$")
+| stats min(_time) as first_login max(_time) as last_login count as logon_count by User
+| eval login_duration=last_login - first_login
+| where login_duration <= 600
+| sort - logon_count
+| table User, logon_count, login_duration
+```
+
+#### 🔍 Explanation
+
+| Component                                                     | Purpose                                                                 |
+|---------------------------------------------------------------|-------------------------------------------------------------------------|
+| `EventCode=4624`                                              | Filters for **successful logon events**                                 |
+| `eval User=coalesce(TargetUserName, Account_Name)`            | Uses `TargetUserName` if available, otherwise falls back to `Account_Name` |
+| `isnotnull(User)`                                             | Ensures we only analyze events with a valid user                        |
+| `NOT like(User, "%$")`                                        | Excludes **machine accounts** (they typically end in `$`)               |
+| `stats min(_time) as first_login max(_time) as last_login count as logon_count by User` | Calculates first login, last login, and total login attempts per user  |
+| `eval login_duration=last_login - first_login`                | Calculates the time span of logon activity in **seconds**               |
+| `where login_duration <= 600`                                 | Filters to users whose entire login activity occurred **within 10 minutes** |
+| `sort - logon_count`                                          | Sorts users by the **most login attempts** in that 10-minute window     |
+| `table User, logon_count, login_duration`                     | Displays clean output with username, number of logons, and duration     |
