@@ -1,5 +1,6 @@
 import React, { useState, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ClipboardCopy, Check } from 'lucide-react';
 
 type RevealFlagProps = {
   readonly children: ReactNode;
@@ -52,9 +53,20 @@ export default function RevealFlag({ children }: RevealFlagProps) {
           <code>{children}</code>
           <button
             onClick={copyToClipboard}
-            className="absolute top-2 right-2 text-xs bg-green-200 dark:bg-green-600 hover:bg-green-300 dark:hover:bg-green-500 text-green-800 dark:text-white px-2 py-1 rounded"
+            className="absolute top-2 right-2 flex items-center gap-1 text-xs bg-green-200 dark:bg-green-600 hover:bg-green-300 dark:hover:bg-green-500 text-green-800 dark:text-white px-2 py-1 rounded"
+            title={copied ? 'Copied!' : 'Copy to clipboard'}
           >
-            {copied ? 'Copied!' : 'Copy'}
+            {copied ? (
+              <>
+                <Check className="w-4 h-4" />
+                Copied!
+              </>
+            ) : (
+              <>
+                <ClipboardCopy className="w-4 h-4" />
+                Copy
+              </>
+            )}
           </button>
         </motion.div>
       ) : (
