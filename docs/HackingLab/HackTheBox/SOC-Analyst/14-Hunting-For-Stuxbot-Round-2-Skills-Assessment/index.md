@@ -292,7 +292,7 @@ User: EAGLE\svc-sql1
 
 ### Hunt 3: Create a KQL query to hunt for "`PowerShell Remoting for Lateral Movement` [Red Team Notes - WinRM for Lateral Movement](https://www.ired.team/offensive-security/lateral-movement/t1028-winrm-for-lateral-movement)". Enter the content of the `winlog.user.name` field in the document that is related to PowerShell remoting-based lateral movement towards DC1
 
-<RevealFlag> flag{svc-sql1} </RevealFlag>
+<RevealFlag> `svc-sql1` </RevealFlag>
 
 ```sql
 message:(*Enter-PSSession* OR *New-PSSession* OR *Invoke-Command* OR *Invoke-Expression* OR *Get-PSSession* OR *Remove-PSSession* OR *ComputerName* OR *WSMan* OR *ShellId* OR *Microsoft.PowerShell* OR *session.configuration* OR *Enable-PSRemoting* OR *winrm*) OR
