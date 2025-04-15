@@ -33,7 +33,7 @@ The cybersecurity strategy implemented is predicated on the utilization of the E
 
 ### Hunt 1: Create a KQL query to hunt for "`Lateral Tool Transfer` [MITRE ATT&CK - T1570](https://attack.mitre.org/techniques/T1570/)" to `C:\Users\Public`. Enter the content of the `user.name` field in the document that is related to a transferred tool that starts with "`r`" as your answer
 
-> svc-sql1
+<RevealFlag>{`svc-sql1`}</RevealFlag>
 
 - Let's check for [Sysmon Event ID 15 - FileCreateStreamHash (streams added to existing files)](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90015)
   - Files which come from the internet
@@ -207,7 +207,7 @@ User: EAGLE\svc-sql1
 
 ### Hunt 2: Create a KQL query to hunt for "`Boot or Logon Autostart Execution: Registry Run Keys / Startup Folder` [MITRE ATT&CK - T1547.001](https://attack.mitre.org/techniques/T1547/001/)". Enter the content of the `registry.value` field in the document that is related to the first registry-based persistence action as your answer
 
-> LgvHsviAUVTsIN
+<RevealFlag>{`LgvHsviAUVTsIN`}</RevealFlag>
 
 - Let's check for [Sysmon Event ID 13 - Registry value set](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90013)
   - This Registry event type identifies Registry value modifications. The event records the value written for Registry values of type **DWORD** and **QWORD**.
