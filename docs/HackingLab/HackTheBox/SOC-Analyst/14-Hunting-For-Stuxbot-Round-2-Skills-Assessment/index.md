@@ -6,6 +6,8 @@ published: 2025-04-10
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
+import RevealFlag from '@site/src/components/RevealFlag';
+
 # Hunting For Stuxbot (Round 2)
 
 Recently uncovered details shed light on the operational strategy of Stuxbot's newest iteration.
