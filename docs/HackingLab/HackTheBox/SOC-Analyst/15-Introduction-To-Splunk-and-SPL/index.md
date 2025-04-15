@@ -572,7 +572,7 @@ We can also see on the left hand side of the "**Search & Reporting**" applicatio
 Data Models provide an organized, hierarchical view of our data, simplifying complex datasets into understandable structures. They're designed to make it easier to create meaningful reports, visualizations, and dashboards without needing a deep understanding of the underlying data sources or the need to write complex SPL queries. Here is how we can use the Data Models feature to identify and understand our data:
 
   - `Accessing Data Models`  
-  To access Data Models, we click on the `Settings` tab on the top right corner of the Splunk Web interface. Then we select `Data Models` under the `Knowledge` section. This will lead us to the Data Models management page. **<-- If it appears empty, please execute a search and navigate to the Data Models page again.**
+  To access Data Models, we click on the `Settings` tab on the top right corner of the Splunk Web interface. Then we select `Data Models` under the `Knowledge` section. This will lead us to the Data Models management page. **`<-- If it appears empty, please execute a search and navigate to the Data Models page again.`**
 
   - `Understanding Existing Data Models`  
   On the Data Models management page, we can see a list of available Data Models. These might include models created by ourselves, our team, or models provided by Splunk Apps. Each Data Model is associated with a specific app context and is built to describe the structured data related to the app's purpose.
