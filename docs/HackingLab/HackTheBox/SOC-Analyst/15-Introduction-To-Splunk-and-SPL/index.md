@@ -111,7 +111,7 @@ Utilizing `sourcetype` **restricts the scope exclusively to** **Sysmon event log
 4. **The table command**  
     The `table` command presents search results in a tabular format.
 
-### **Example using `table`
+### Example using `table`
 
 ```sql
 index="main" sourcetype="WinEventLog:Sysmon" EventCode=1 | table _time, host, Image

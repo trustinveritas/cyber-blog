@@ -32,4 +32,5 @@
 .medium-zoom-overlay {
   background: rgba(0, 0, 0, 0.85);
   z-index: 10000;
+  transition: background 0.3s ease;
 }
