@@ -7,6 +7,17 @@ type RevealFlagProps = {
 
 export default function RevealFlag({ children }: RevealFlagProps) {
   const [revealed, setRevealed] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(String(children));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Clipboard copy failed:', err);
+    }
+  };
 
   return (
     <div className="my-6">
@@ -36,9 +47,15 @@ export default function RevealFlag({ children }: RevealFlagProps) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="bg-gray-100 dark:bg-gray-800 p-4 rounded-md font-mono text-green-600 dark:text-green-400 border border-green-500 dark:border-green-400"
+          className="relative bg-gray-100 dark:bg-gray-800 p-4 rounded-md font-mono text-green-600 dark:text-green-400 border border-green-500 dark:border-green-400"
         >
-          {children}
+          <code>{children}</code>
+          <button
+            onClick={copyToClipboard}
+            className="absolute top-2 right-2 text-xs bg-green-200 dark:bg-green-600 hover:bg-green-300 dark:hover:bg-green-500 text-green-800 dark:text-white px-2 py-1 rounded"
+          >
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
         </motion.div>
       ) : (
         <div className="blur-sm select-none bg-gray-200 dark:bg-gray-700 p-4 rounded-md h-6" />
