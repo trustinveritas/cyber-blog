@@ -4,7 +4,7 @@ import mediumZoom from 'medium-zoom';
 
 export default function LayoutWrapper(props) {
   useEffect(() => {
-    mediumZoom('article img'); // oder einfach 'img' für alles
+    mediumZoom('.theme-doc-markdown img');
   }, []);
 
   return <Layout {...props} />;
