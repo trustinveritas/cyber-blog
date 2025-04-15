@@ -361,7 +361,7 @@ At this stage, we have amassed a significant amount of information to present an
 
 ### 1. Navigate to http://[Target IP]:5601 and follow along as we hunt for Stuxbot. In the part where default.exe is under investigation, a VBS file is mentioned. Enter its full name as your answer, including the extension.
 
-> XceGuhkzaTrOy.vbs
+<RevealFlag>{`XceGuhkzaTrOy.vbs`}</RevealFlag>
 
 #### [Sysmon Event ID 3 (Network connection)](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90003)
 
@@ -514,7 +514,7 @@ process.pid:"9944" and process.name:"powershell.exe"
 
 ---
 
-####  [Sysmon Event ID 22 (DNSEvent)](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90022)
+#### [Sysmon Event ID 22 (DNSEvent)](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90022)
 
 Add fields: `file.path` > `destination.ip` > `dns.question.name`
 
@@ -559,7 +559,7 @@ User: EAGLE\bob
 
 ---
 
-####  [Sysmon Event ID 11 (File create)](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90011)
+#### [Sysmon Event ID 11 (File create)](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=90011)
 
 ```txt
 File created:
@@ -760,7 +760,7 @@ User: EAGLE\svc-sql1
 
 ### 2. Stuxbot uploaded and executed mimikatz. Provide the process arguments (what is after .\mimikatz.exe, ...) as your answer.
 
-> `lsadump::dcsync /domain:eagle.local /all /csv, exit`
+<RevealFlag>{`lsadump::dcsync /domain:eagle.local /all /csv, exit`}</RevealFlag>
 
 #### `SharpHound.exe` > Sysmon logs for a process with that name
 
@@ -1022,7 +1022,7 @@ The attacker can now:
 
 ### 3. Some PowerShell code has been loaded into memory that scans/targets network shares. Leverage the available PowerShell logs to identify from which popular hacking tool this code derives. Answer format (one word): P____V___
 
-> PowerView
+<RevealFlag>{`PowerView`}</RevealFlag>
 
 #### Microsoft-Windows-PowerShell/Operational - [Event ID 4104](https://research.splunk.com/endpoint/d6f2b006-0041-11ec-8885-acde48001122/)
 
