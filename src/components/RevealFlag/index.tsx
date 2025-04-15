@@ -39,7 +39,7 @@ export default function RevealFlag({ children }: RevealFlagProps) {
         whileTap={{ scale: 0.95 }}
         whileHover={{ scale: 1.05 }}
         onClick={() => setRevealed(true)}
-        className="mb-4 inline-block bg-transparent text-yellow-600 dark:text-yellow-400 border border-yellow-600 dark:border-yellow-400 px-4 py-1.5 rounded-md font-semibold transition-all duration-200 hover:bg-yellow-100 dark:hover:bg-yellow-800"
+        className="button button--secondary button--lg"
       >
         Reveal Solution
       </motion.button>
