@@ -41,7 +41,7 @@ export default function RevealFlag({ children }: RevealFlagProps) {
         onClick={() => setRevealed(true)}
         className="button button--secondary button--lg"
       >
-        Reveal Solution
+        🔐 Reveal Solution
       </motion.button>
 
       {revealed ? (
