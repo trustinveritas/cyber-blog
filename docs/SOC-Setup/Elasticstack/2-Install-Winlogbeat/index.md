@@ -122,7 +122,9 @@ processors:
   - add_cloud_metadata: ~
 ```
 
-## ⚙️ 4. Validate the config (`winlogbeat.yml`)
+---
+
+## ✅ 4. Validate the config (`winlogbeat.yml`)
 
 ```powershell
 cd "C:\Program Files\Winlogbeat"
@@ -137,11 +139,15 @@ cd "C:\Program Files\Winlogbeat"
 Config OK
 ```
 
-## 🚀 5. Install Winlogbeat as a Windows Service
+---
+
+## 🧱 5. Install Winlogbeat as a Windows Service
 
 ```powershell
 .\install-service-winlogbeat.ps1
 ```
+
+---
 
 ## 📊 6. Setup Dashboards (optional)
 
@@ -154,7 +160,9 @@ Loading dashboards (Kibana must be running and reachable)
 Loaded dashboards
 ```
 
-## ⚙️ 7. Start `winlogbeat` service
+---
+
+## 🚀 7. Start `winlogbeat` service
 
 ```powershell
 Start-Service winlogbeat
@@ -172,3 +180,20 @@ Status   Name               DisplayName
 Running  winlogbeat         winlogbeat
 ```
 
+---
+
+## 🧠 8. Useful Checks
+
+Check if data is arriving
+
+- Open Kibana → Discover
+- Look for `winlogbeat-*` index pattern
+- Use filters like
+  - `event.code: 4624` (logon)
+  - `event.code: 4688` (process start)
+
+---
+
+## ✅ You did it! 🎉
+
+Your Windows system is now shipping logs into the Elastic Stack like a pro 🧠
