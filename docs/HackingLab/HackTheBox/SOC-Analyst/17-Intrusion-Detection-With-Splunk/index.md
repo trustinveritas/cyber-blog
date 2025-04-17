@@ -1,5 +1,5 @@
 ---
-title: "16. Using Splunk Applications"
+title: "17. Intrusion Detection With Splunk (Real-world Scenario)"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-04-16
