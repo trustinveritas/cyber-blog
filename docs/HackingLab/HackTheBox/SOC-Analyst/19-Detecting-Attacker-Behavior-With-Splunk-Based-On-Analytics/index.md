@@ -171,9 +171,9 @@ index=* EventCode=8 SourceImage=*
 
 | Stage | What it does | Why it matters |
 |-------|--------------|----------------|
-| **Filter events** <br> `index=* EventCode=8 SourceImage=*` | Grabs **Sysmon Event ID 8** records (CreateRemoteThread) and keeps only those with a `SourceImage` (the injecting process). | Isolates the telemetry that reveals process‑injection behavior. |
-| **Count per process** <br> `stats count AS total_threads BY SourceImage` | Counts how many remote threads each process (`SourceImage`) starts. | Gives a workload score for every injector. |
-| **Calculate mean & σ** <br> `eventstats avg(total_threads) AS avg_threads stdev(total_threads) AS stdev_threads` | Adds two columns—overall **average** and **standard deviation** of thread counts—to every row. | Sets a statistical baseline for “normal” behavior. |
-| **Compute z‑score** <br> `eval z_score = (total_threads - avg_threads) / stdev_threads` | For each process: `(count − avg) ÷ stdev`. | Expresses how many **standard deviations** a process deviates from the mean. |
-| **Keep outliers** <br> `where z_score > 2` | Retains only processes > 2 σ above the mean (classic outlier rule). | Flags unusually “chatty” injectors that may be malicious. |
-| **Rank & display** <br> `sort - z_score` <br> `table SourceImage total_threads z_score` | Orders results by highest deviation and shows a clean table. | The top row is your prime suspect submit just the `.exe` name.
+| **Filter events** <br /> `index=* EventCode=8 SourceImage=*` | Grabs **Sysmon Event ID 8** records (CreateRemoteThread) and keeps only those with a `SourceImage` (the injecting process). | Isolates the telemetry that reveals process‑injection behavior. |
+| **Count per process** <br /> `stats count AS total_threads BY SourceImage` | Counts how many remote threads each process (`SourceImage`) starts. | Gives a workload score for every injector. |
+| **Calculate mean & σ** <br /> `eventstats avg(total_threads) AS avg_threads stdev(total_threads) AS stdev_threads` | Adds two columns—overall **average** and **standard deviation** of thread counts—to every row. | Sets a statistical baseline for “normal” behavior. |
+| **Compute z‑score** <br /> `eval z_score = (total_threads - avg_threads) / stdev_threads` | For each process: `(count − avg) ÷ stdev`. | Expresses how many **standard deviations** a process deviates from the mean. |
+| **Keep outliers** <br /> `where z_score > 2` | Retains only processes > 2 σ above the mean (classic outlier rule). | Flags unusually “chatty” injectors that may be malicious. |
+| **Rank & display** <br /> `sort - z_score` <br /> `table SourceImage total_threads z_score` | Orders results by highest deviation and shows a clean table. | The top row is your prime suspect submit just the `.exe` name.
