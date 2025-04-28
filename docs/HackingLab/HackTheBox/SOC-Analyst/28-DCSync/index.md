@@ -198,6 +198,7 @@ Supplemental Credentials:
 <br />
 
 ![Event-ID-4662](img/Event-ID-4662.png)
+
 ---
 
 ## 🎁 Bonus
