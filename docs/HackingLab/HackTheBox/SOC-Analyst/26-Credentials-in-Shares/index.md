@@ -199,7 +199,7 @@ Import-Module .\PowerView.ps1
 #### `Invoke-ShareFinder`
 
 ```powershell
- Invoke-ShareFinder -ComputerName WS001 -ExcludeStandard -CheckShareAccess
+Invoke-ShareFinder -domain eagle.local -ExcludeStandard -CheckShareAccess
 ```
 
 ```powershell
