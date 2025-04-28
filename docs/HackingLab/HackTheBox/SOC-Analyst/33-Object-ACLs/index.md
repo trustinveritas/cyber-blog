@@ -112,6 +112,25 @@ Similarly, if Bob were to perform the second scenario, an event with [ID 4742](h
 
 ```powershell
 cd "C:\Users\bob\Downloads\"
-"C:\Users\bob\Downloads\"
+.\SharpHound.exe -c All
+```
+
+:::note
+How to setup [BloodHound](https://blog.salucci.ch/docs/Pentesting-Tools/ActiveDirectory/BloodHound-SharpHound/).
+:::
+
+<br />
+
+---
+
+### ⚡ BloodHound Pentesting Tips
+
+#### 1. 🖥️ Enumerate Sessions and Admin Rights
+
+**1.1 Find Users with Admin Rights on Computers**
+
+```txt
+MATCH (u:User)-[:AdminTo]->(c:Computer)
+RETURN u.name, c.name
 ```
 
