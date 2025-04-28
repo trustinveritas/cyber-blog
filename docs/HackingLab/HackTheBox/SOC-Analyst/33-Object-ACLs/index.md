@@ -125,8 +125,6 @@ How to setup [BloodHound](https://blog.salucci.ch/docs/Pentesting-Tools/ActiveDi
 
 > `Bob` has `GenericAll` permissions over 2 objects (`Anni` & `Server01`)
 
-
-
 ---
 
 ### ⚡ BloodHound Pentesting Tips
