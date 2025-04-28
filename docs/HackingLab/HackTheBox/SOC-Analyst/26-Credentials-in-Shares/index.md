@@ -152,7 +152,7 @@ Because the provided password is wrong, we would primarily expect failed logon a
 
 - [4625](https://www.ultimatewindowssecurity.com/securitylog/encyclopedia/event.aspx?eventid=4625)
 
-![4625](imag/4625.png)
+![4625](img/4625.png)
 
 ---
 
