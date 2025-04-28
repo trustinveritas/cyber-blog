@@ -121,16 +121,103 @@ How to setup [BloodHound](https://blog.salucci.ch/docs/Pentesting-Tools/ActiveDi
 
 <br />
 
+![BloodHound-2](img/BloodHound-2.png)
+
+> `Bob` has `GenericAll` permissions over 2 objects (`Anni` & `Server01`)
+
+
+
 ---
 
 ### ⚡ BloodHound Pentesting Tips
 
-#### 1. 🖥️ Enumerate Sessions and Admin Rights
+#### 1. 🛠️ Administrative Access
 
-**1.1 Find Users with Admin Rights on Computers**
+**1.1 Identify users with administrative rights on computers**
 
 ```txt
 MATCH (u:User)-[:AdminTo]->(c:Computer)
 RETURN u.name, c.name
 ```
 
+---
+
+**1.2 Find users with Remote Desktop Protocol (RDP) access**
+
+```txt
+MATCH (u:User)-[:CanRDP]->(c:Computer)
+RETURN u.name, c.name
+```
+
+---
+
+**1.3 List computers where a user has administrative rights**
+
+```txt
+MATCH (u:User {name:"CORP\\bob"})-[:AdminTo]->(c:Computer)
+RETURN c.name
+```
+
+---
+
+#### 2. 🧑‍💻 Session Enumeration
+
+**2.1 Find active user sessions on computers**
+
+```txt
+MATCH (c:Computer)-[:HasSession]->(u:User)
+RETURN c.name, u.name
+```
+
+---
+
+**2.2 Identify computers with sessions of high-privilege users (e.g., Domain Admins)**
+
+```txt
+MATCH (c:Computer)-[:HasSession]->(u:User)
+WHERE u.memberof = "DOMAIN ADMINS@corp.local"
+RETURN c.name, u.name
+```
+
+> Adjust the `memberof` value to match your domain's naming convention.
+
+---
+
+#### 3. 🔑 Credential Access
+
+**3.1 Discover Kerberoastable accounts (users with Service Principal Names)**
+
+```txt
+MATCH (u:User)
+WHERE u.hasspn = true
+RETURN u.name
+```
+
+---
+
+**3.2 Identify AS-REP roastable accounts (users without pre-authentication)**
+
+```txt
+MATCH (u:User)
+WHERE u.dontreqpreauth = true
+RETURN u.name
+```
+
+---
+
+#### 4. 🛡️ Delegation and Trusts
+
+**4.1 Find computers with unconstrained delegation enabled**
+
+```txt
+MATCH (c:Computer)
+WHERE c.unconstraineddelegation = true
+RETURN c.name
+```
+
+**4.2 Identify users with constrained delegation rights**
+
+```txt
+MATCH (u:User)-[:AllowedToDelegate]->(c:Computer)
+RETURN u.name, c.name
+```
