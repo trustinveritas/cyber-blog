@@ -20,11 +20,11 @@ This guide walks through a secure setup of **GitHub access using a YubiKey** on 
 ## 🔧 Prerequisites
 
 - Windows 11 (no admin rights required)
-- [Git for Windows](https://git-scm.com/downloads/win)
-- [Gpg4win](https://www.gpg4win.org/thanks-for-download.html) (Kleopatra, GPG Agent)
-- A touch-enabled [YubiKey](https://www.yubico.com/der-yubikey/yubikey-5-fips-serie/?lang=de) (OpenPGP-capable)
-- [GitHub](https://github.com/trustinveritas) account
-- [PowerShell](https://learn.microsoft.com/de-de/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.5)
+- Git for Windows
+- Gpg4win (Kleopatra, GPG Agent)
+- A touch-enabled YubiKey (OpenPGP-capable)
+- GitHub account
+- PowerShell
 
 ---
 
@@ -47,7 +47,7 @@ git config --global url."git@github.com:".insteadOf "https://github.com/"
    - GPG Agent
    - Smartcard Support
 
-No admin rights are required if using the per-user installer.
+> No admin rights are required if using the per-user installer.
 
 ---
 
@@ -71,18 +71,15 @@ gpg --edit-card
 
 Then enter:
 
-:::tip
-
-Before you proceed, set a new User / Admin PIN
-
-`admin` → `passwd`
-
-:::
-
 ```text
 admin
+key-attr
 generate
 ```
+
+:::info
+Set `1` - `RSA` to `4096` if [supported by the yubi key](https://support.yubico.com/hc/en-us/articles/360013790259-Using-Your-YubiKey-with-OpenPGP).
+:::
 
 - Respond to name/email prompts
 - Say **yes** when asked to store the keys **on the card**
@@ -111,6 +108,8 @@ Upload contents of `pubkey.asc` to:
 
 > Get your GPG key ID
 
+![YOURKEYID](img/YOURKEYID.png)
+
 ```powershell
 gpg --list-secret-keys --keyid-format LONG
 ```
@@ -123,15 +122,12 @@ git config --global user.email "your@email.com"
 git config --global user.signingkey YOURKEYID
 git config --global commit.gpgsign true
 git config --global gpg.program "C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe"
+git config --global core.sshCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe"
 ```
 
 :::tip
-
-`YOURKEYID` is red marked in the picture
-
+If you want that `VSCode` makes commites signed, use `VSCode Settings` (`Help > Settings`) and search for: `git.enableCommitSigning`
 :::
-
-![YOURKEYID](img/YOURKEYID.png)
 
 ---
 
@@ -161,7 +157,8 @@ Paste this secure config:
 
 ```ini
 enable-ssh-support
-write-env-file
+enable-win32-openssh-support
+use-standard-socket
 
 # Cache timeout (seconds)
 default-cache-ttl 60
@@ -190,12 +187,12 @@ gpg-connect-agent /bye
 > Require physical touch for all GPG subkeys
 
 ```powershell
-ykman openpgp keys set-touch sig always
-ykman openpgp keys set-touch enc always
-ykman openpgp keys set-touch aut always
+ykman openpgp keys set-touch sig ON
+ykman openpgp keys set-touch enc ON
+ykman openpgp keys set-touch aut ON
 ```
 
-This ensures no operation can happen without you physically tapping the YubiKey.
+> This ensures no operation can happen without you physically tapping the YubiKey.
 
 ---
 
@@ -207,30 +204,17 @@ This ensures no operation can happen without you physically tapping the YubiKey.
 if (!(Test-Path $PROFILE)) {
     New-Item -ItemType File -Path $PROFILE -Force
 }
-```
 
-> Open it in Notepad
-
-```powershell
+# Open it in Notepad
 notepad $PROFILE
 ```
 
 Add this to the end:
 
-> Set SSH_AUTH_SOCK only if the GPG agent socket exists and is valid
+> Enable GPG Smartcard (YubiKey) for SSH in PowerShell
 
 ```powershell
-$gpgSockFile = "$env:APPDATA\gnupg\S.gpg-agent.ssh"
-if (Test-Path $gpgSockFile) {
-    try {
-        $sockPath = Get-Content $gpgSockFile -ErrorAction Stop
-        if ($sockPath -match "^\\\\\?\\pipe\\gnupg") {
-            $env:SSH_AUTH_SOCK = $sockPath
-        }
-    } catch {
-        Write-Warning "Unable to set SSH_AUTH_SOCK: $_"
-    }
-}
+$env:SSH_AUTH_SOCK = "$env:APPDATA\gnupg\S.gpg-agent.ssh"
 ```
 
 Apply immediately:
@@ -251,9 +235,18 @@ ssh -T git@github.com
 
 Expected output:
 
-```powershell
+```text
 Hi yourusername! You've successfully authenticated, but GitHub does not provide shell access.
 ```
+
+:::info
+If you get an error use the following command to get `verbose` output.
+
+```powershell
+ssh -vT git@github.com
+```
+
+:::
 
 ---
 
@@ -269,7 +262,7 @@ git add secure.txt
 git commit -S -m "Signed commit using YubiKey"
 ```
 
-You will be prompted to touch the YubiKey.
+> You will be prompted to touch the YubiKey.
 
 ---
 
@@ -309,8 +302,6 @@ Function End-GPGSession {
 
 ---
 
-:::info
+## 🔐 Final Thoughts
 
 This setup gives you **maximum GitHub security with minimal trust** — perfect for corporate systems, hardened developer environments, or CTF/Red Team tooling workflows. YubiKey protects your keys. GPG agent settings minimize session risk. And PowerShell keeps it all reproducible.
-
-:::
