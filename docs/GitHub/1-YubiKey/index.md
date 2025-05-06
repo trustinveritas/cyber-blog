@@ -126,7 +126,7 @@ git config --global core.sshCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe"
 ```
 
 :::tip
-If you want that `VSCode` makes commites signed, use `VSCode Settings` (`Help > Settings`) and search for: `git.enableCommitSigning`
+If you want that `VSCode` makes commites signed, use `VSCode Settings` (`File > Settings > Settings`) and search for: `git.enableCommitSigning`
 :::
 
 ---
