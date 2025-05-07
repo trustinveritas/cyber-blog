@@ -10,48 +10,37 @@ categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 
 This guide walks through a secure setup of **GitHub access using a YubiKey** on **Windows 11**, including:
 
-- SSH authentication with your YubiKey (no HTTPS, no PAT)
-- GPG commit signing with full hardware isolation
-- Touch requirement on every cryptographic operation
-- Secure, non-admin-friendly setup hardened against abuse
+- `SSH` authentication with your YubiKey
+- `GPG` commit signing with full hardware isolation
+- `Touch` requirement on every cryptographic operation
 
 ---
 
 ## 🔧 Prerequisites
 
 - Windows 11 (no admin rights required)
-- Git for Windows
-- Gpg4win (Kleopatra, GPG Agent)
-- A touch-enabled YubiKey (OpenPGP-capable)
-- GitHub account
-- PowerShell
+- [Git](https://git-scm.com/downloads/win) for Windows
+- [Gpg4win](https://gpg4win.org/) (Kleopatra, GPG Agent)
+- A touch-enabled [YubiKey](https://www.yubico.com/der-yubikey/yubikey-5-fips-serie/?lang=de) (OpenPGP-capable)
+- [GitHub account](https://github.com/trustinveritas)
+- [PowerShell](https://learn.microsoft.com/de-de/powershell/scripting/install/installing-powershell-on-windows?view=powershell-7.5)
 
 ---
 
-## 1️⃣ Replace HTTPS with SSH
-
-> Make Git use SSH instead of HTTPS (avoids port 443)
-
-```powershell
-git config --global url."git@github.com:".insteadOf "https://github.com/"
-```
-
----
-
-## 2️⃣ Install Gpg4win (if not already)
+## 1️⃣ Install Gpg4win (if not already)
 
 1. Download from: [https://gpg4win.org/](https://gpg4win.org/)
 2. Install with:
-   - Kleopatra
-   - GnuPG
-   - GPG Agent
-   - Smartcard Support
+   - `Kleopatra`
+   - `GnuPG`
+   - `GPG Agent`
+   - `Smartcard Support`
 
 > No admin rights are required if using the per-user installer.
 
 ---
 
-## 3️⃣ Connect YubiKey and Check Status
+## 2️⃣ Connect YubiKey and Check Status
 
 > Check YubiKey status and confirm OpenPGP is detected
 
@@ -59,9 +48,11 @@ git config --global url."git@github.com:".insteadOf "https://github.com/"
 gpg --card-status
 ```
 
+![GPG-Card-Status](img//GPG-Card-Status.png)
+
 ---
 
-## 4️⃣ Generate Keys Directly on the YubiKey
+## 3️⃣ Generate Keys Directly on the YubiKey
 
 > Launch interactive card tool
 
@@ -70,6 +61,15 @@ gpg --edit-card
 ```
 
 Then enter:
+
+:::tip
+Before generating the keys, change the default User / Admin `PIN`
+
+Command: `admin` > `passwd`
+
+**Default User PIN:** `123456`
+**Default Admin PIN:** `12345678`
+:::
 
 ```text
 admin
@@ -90,7 +90,7 @@ Set `1` - `RSA` to `4096` if [supported by the yubi key](https://support.yubico.
 
 ---
 
-## 5️⃣ Export Public GPG Key
+## 4️⃣ Export Public `GPG` Key
 
 > Export public key in ASCII format for GitHub
 
@@ -104,20 +104,51 @@ Upload contents of `pubkey.asc` to:
 
 ---
 
-## 6️⃣ Configure Git for GPG Signing
+## 5️⃣ Export Public `SSH` Key
 
-> Get your GPG key ID
+> Get your `Authentication key ID`
 
-![YOURKEYID](img/YOURKEYID.png)
+```powershell
+gpg --card-status
+```
+
+```powershell
+[ SNIP ]
+
+Signature key ....: 
+      created ....: 
+Encryption key....: 
+      created ....: 
+Authentication key: YOU NEED THIS ONE HERE COMPLETE
+      created ....: 
+
+[ SNIP ]
+```
+
+![AuthenticationID](img/AuthenticationID.png)
+
+## 6️⃣ Configure `Git` for `GPG` Signing
+
+> Get your `GPG Key ID`
 
 ```powershell
 gpg --list-secret-keys --keyid-format LONG
 ```
 
-> Configure Git to use GPG with your YubiKey
+```powershell
+[ SNIP ]
+
+sec>  rsa4096/YOU NEED THIS ONE
+
+[ SNIP ]
+```
+
+![YOURKEYID](img/YOURKEYID.png)
+
+> Configure `Git` to use `GPG` with your `YubiKey`
 
 ```powershell
-git config --global user.name "Alessandro Salucci"
+git config --global user.name "YOUR USER NAME"
 git config --global user.email "your@email.com"
 git config --global user.signingkey YOURKEYID
 git config --global commit.gpgsign true
@@ -125,8 +156,8 @@ git config --global gpg.program "C:\\Program Files (x86)\\GnuPG\\bin\\gpg.exe"
 git config --global core.sshCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe"
 ```
 
-:::tip
-If you want that `VSCode` makes commites signed, use `VSCode Settings` (`File > Settings > Settings`) and search for: `git.enableCommitSigning`
+:::note
+The mail hast to be the **same** like in your `GPG key` generation.
 :::
 
 ---
@@ -136,8 +167,12 @@ If you want that `VSCode` makes commites signed, use `VSCode Settings` (`File > 
 > Generate SSH public key from GPG Auth subkey
 
 ```powershell
-gpg --export-ssh-key your@email.com
+gpg --export-ssh-key Authentication key > id_rsa.pub
 ```
+
+:::note
+Remove all blank spaces
+:::
 
 Copy the output (`ssh-ed25519 ...`) to:
 
@@ -195,33 +230,6 @@ ykman openpgp keys set-touch aut ON
 > This ensures no operation can happen without you physically tapping the YubiKey.
 
 ---
-
-## 🔟 Configure PowerShell Profile to Auto-Set SSH_AUTH_SOCK Securely
-
-> Ensure PowerShell profile exists
-
-```powershell
-if (!(Test-Path $PROFILE)) {
-    New-Item -ItemType File -Path $PROFILE -Force
-}
-
-# Open it in Notepad
-notepad $PROFILE
-```
-
-Add this to the end:
-
-> Enable GPG Smartcard (YubiKey) for SSH in PowerShell
-
-```powershell
-$env:SSH_AUTH_SOCK = "$env:APPDATA\gnupg\S.gpg-agent.ssh"
-```
-
-Apply immediately:
-
-```powershell
-. $PROFILE
-```
 
 ---
 
@@ -299,9 +307,3 @@ Function End-GPGSession {
 | TTL-based session expiry   | ✅ Yes    | 1–5 minute cache window    |
 | Touch requirement enforced | ✅ Yes    | All subkeys require tap    |
 | Admin rights needed        | ❌ No     | All actions run as user    |
-
----
-
-## 🔐 Final Thoughts
-
-This setup gives you **maximum GitHub security with minimal trust** — perfect for corporate systems, hardened developer environments, or CTF/Red Team tooling workflows. YubiKey protects your keys. GPG agent settings minimize session risk. And PowerShell keeps it all reproducible.
