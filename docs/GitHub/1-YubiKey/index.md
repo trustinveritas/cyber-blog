@@ -90,21 +90,7 @@ Set `1` - `RSA` to `4096` if [supported by the yubi key](https://support.yubico.
 
 ---
 
-## 4️⃣ Export Public `GPG` Key
-
-> Export public key in ASCII format for GitHub
-
-```powershell
-gpg --armor --export your@email.com > pubkey.asc
-```
-
-Upload contents of `pubkey.asc` to:
-
-**`GitHub` → `Settings` → `SSH and GPG Keys` → `New GPG Key`**
-
----
-
-## 5️⃣ Export Public `SSH` Key
+## 4️⃣ Export Public `SSH` Key
 
 > Get your `Authentication key ID`
 
@@ -127,7 +113,7 @@ Authentication key: YOU NEED THIS ONE HERE COMPLETE
 
 ![AuthenticationID](img/AuthenticationID.png)
 
-## 6️⃣ Configure `Git` for `GPG` Signing
+## 5️⃣ Configure `Git` for `GPG` Signing
 
 > Get your `GPG Key ID`
 
@@ -159,6 +145,20 @@ git config --global core.sshCommand "C:\\Windows\\System32\\OpenSSH\\ssh.exe"
 :::note
 The mail hast to be the **same** like in your `GPG key` generation.
 :::
+
+---
+
+## 6️⃣ Export Public `GPG` Key
+
+> Export public key in ASCII format for GitHub
+
+```powershell
+gpg -o pubkey.asc --armor --export YOURKEYID
+```
+
+Upload contents of `pubkey.asc` to:
+
+**`GitHub` → `Settings` → `SSH and GPG Keys` → `New GPG Key`**
 
 ---
 
@@ -228,8 +228,6 @@ ykman openpgp keys set-touch aut ON
 ```
 
 > This ensures no operation can happen without you physically tapping the YubiKey.
-
----
 
 ---
 
