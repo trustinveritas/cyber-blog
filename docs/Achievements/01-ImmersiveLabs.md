@@ -14,7 +14,7 @@ import AchievementCard from '@site/src/components/AchievementCard';
 
 <AchievementCard 
   title="Immersive Labs – Incident Response"
-  description="A simulated lab exercise covering credential harvesting techniques."
+  description="A simulated lab exercise covering Incident Response."
   imageSrc="/img/IncidentResponse.png"
   externalLink="https://immersivelabs.online/share/achievement/56435a07bb111ebebd4f050bdbaaeeae"
 />
