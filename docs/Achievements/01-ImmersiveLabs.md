@@ -1,0 +1,17 @@
+---
+title: "🏆 Achievements"
+authors: [asalucci]
+tags: [HackTheBox, CTF, trustinveritas, alessandro]
+published: 2025-05-21
+categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
+---
+
+# 🏆 Achievements
+
+## 🎖️ Immersive Labs Badge
+
+<AchievementCard 
+  title="Immersive Labs – Incident Response"
+  description="A simulated lab exercise covering credential harvesting techniques."
+  iframeSrc="https://immersivelabs.online/share/achievement/56435a07bb111ebebd4f050bdbaaeeae"
+/>
