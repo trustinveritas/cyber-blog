@@ -6,6 +6,8 @@ published: 2025-05-21
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
+import AchievementCard from '@site/src/components/AchievementCard';
+
 # 🏆 Achievements
 
 ## 🎖️ Immersive Labs Badge
