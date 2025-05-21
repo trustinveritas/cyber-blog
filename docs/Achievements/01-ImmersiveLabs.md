@@ -1,5 +1,5 @@
 ---
-title: "🏆 Achievements"
+title: "ImmersiveLabs"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
 published: 2025-05-21
