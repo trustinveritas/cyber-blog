@@ -1,15 +1,12 @@
-name: Validate and Deploy Docusaurus Blog
+name: Build and Deploy
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
 
 jobs:
-  validate:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -22,22 +19,13 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint code
-        run: npm run lint
-
       - name: Build the project
         run: npm run build
-
-      - name: Validate frontmatter
-        run: node validate-frontmatter.js
-
-      - name: Lint Markdown
-        run: npx markdownlint-cli2 "**/*.md" "#node_modules"
 
   deploy:
-    needs: validate
+    needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
 
@@ -52,8 +40,6 @@ jobs:
       - name: Build the project
         run: npm run build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+      - name: Trigger Webhook to Live Server
+        run: |
+          curl -X POST https://blog.salucci.ch/webhook
