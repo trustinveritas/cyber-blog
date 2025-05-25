@@ -23,25 +23,10 @@ sudo apt install caddy
 ## Caddy - Config file `/etc/caddy/Caddyfile`
 
 ```bash
-
-{
-    email senat.borax-0w@icloud.com
-    # Optional: Define global options here
-}
-
 blog.salucci.ch {
     root * /var/www/blog.salucci.ch
-    file_server
     encode gzip
-
-    # Redirect HTTP to HTTPS (handled automatically by Caddy)
-    # No additional configuration needed
-
-    # TLS Configuration
-    # tls {
-        # Caddy automatically obtains and renews certificates via Let's Encrypt
-        # No need to specify certificate paths unless using custom certificates
-    # }
+    file_server
 
     # Security Headers
     header {
@@ -54,12 +39,11 @@ blog.salucci.ch {
         Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
     }
 
-    # Main Route
-    @static {
-        path *
-    }
-    handle @static {
-        try_files {path} {path}/ /index.html
+    # Reverse Proxy for GitHub WebHook
+    @webhook path /webhook*
+    reverse_proxy @webhook 127.0.0.1:5555 {
+        header_up Host {host}
+        header_up X-Real-IP {remote}
     }
 
     # Restrict HTTP methods to GET and HEAD
@@ -68,15 +52,6 @@ blog.salucci.ch {
     }
     respond @disallowed_methods "Method Not Allowed" 405
 
-    # Reverse Proxy for GitHub WebHook
-    reverse_proxy /webhook* {
-        to http://127.0.0.1:5555
-        header_up Host {host}
-        header_up X-Real-IP {remote}
-        header_up X-Forwarded-For {remote}
-        header_up X-Forwarded-Proto {scheme}
-    }
-
     # Deny access to hidden files and directories
     @hidden_files {
         path /.env* /.git* /.bash* /.cache* /.config* /.* /.*/*
@@ -84,9 +59,7 @@ blog.salucci.ch {
     respond @hidden_files "Access Denied" 403
 
     # Deny access to sensitive files
-    @sensitive_files {
-        path_regexp /\.(bak|config|env|git|~)$
-    }
+    @sensitive_files path_regexp sensitive_files ^.*(\.bak|\.config|\.env|\.git|~)$
     respond @sensitive_files "Access Denied" 403
 
     # Block PHP execution
@@ -94,6 +67,9 @@ blog.salucci.ch {
         path *.php
     }
     respond @php_files "PHP execution is disabled" 403
+
+    # Static files fallback
+    try_files {path} {path}/ /index.html
 }
 
 # Refer to the Caddy docs for more information:
