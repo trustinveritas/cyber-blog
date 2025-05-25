@@ -34,57 +34,59 @@ sudo apt install caddy
 # domain name.
 
 blog.salucci.ch {
-    root * /var/www/blog.salucci.ch
-    encode gzip
-    file_server
+        root * /var/www/blog.salucci.ch
+        encode gzip
+        file_server
 
-    # Security Headers
-    header {
-        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
-        X-Frame-Options "DENY"
-        X-Content-Type-Options "nosniff"
-        Referrer-Policy "no-referrer-when-downgrade"
-        X-XSS-Protection "1; mode=block"
-        Permissions-Policy "geolocation=(), microphone=()"
-        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
-    }
-
-    # ✅ Reverse Proxy for GitHub WebHook (POST allowed)
-    @webhook {
-        path /webhook
-        method POST
-    }
-    handle @webhook {
-        reverse_proxy 127.0.0.1:5555 {
-            header_up Host {host}
-            header_up X-Real-IP {remote}
+        # Security Headers
+        header {
+                Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+                X-Frame-Options "DENY"
+                X-Content-Type-Options "nosniff"
+                Referrer-Policy "no-referrer-when-downgrade"
+                X-XSS-Protection "1; mode=block"
+                Permissions-Policy "geolocation=(), microphone=()"
+                Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
         }
-    }
 
-    # 🔒 Restrict HTTP methods globally
-    @disallowed_methods {
-        not method GET HEAD
-    }
-    handle @disallowed_methods {
-        respond "Method Not Allowed" 405
-    }
+        # ✅ Reverse Proxy for GitHub WebHook (POST allowed)
+        @webhook {
+                path /webhook
+                method POST
+        }
+        handle @webhook {
+                reverse_proxy 127.0.0.1:5555 {
+                        header_up Host {host}
+                        header_up X-Real-IP {remote}
+                }
+        }
 
-    # ⛔ Deny access to sensitive files
-    @hidden_files {
-        path /.env* /.git* /.bash* /.cache* /.config* /.* /.*/*
-    }
-    respond @hidden_files "Access Denied" 403
+        # 🔒 Restrict HTTP methods globally
+        @allowed_post path /webhook
+        @disallowed_methods {
+                not method GET HEAD POST
+                not path /webhook
+        }
+        handle @disallowed_methods {
+                respond "Method Not Allowed" 405
+        }
 
-    @sensitive_files path_regexp sensitive_files ^.*(\.bak|\.config|\.env|\.git|~)$
-    respond @sensitive_files "Access Denied" 403
+        # ⛔ Deny access to sensitive files
+        @hidden_files {
+                path /.env* /.git* /.bash* /.cache* /.config* /.* /.*/*
+        }
+        respond @hidden_files "Access Denied" 403
 
-    @php_files {
-        path *.php
-    }
-    respond @php_files "PHP execution is disabled" 403
+        @sensitive_files path_regexp sensitive_files ^.*(\.bak|\.config|\.env|\.git|~)$
+        respond @sensitive_files "Access Denied" 403
 
-    # 🌐 Fallback to static
-    try_files {path} {path}/ /index.html
+        @php_files {
+                path *.php
+        }
+        respond @php_files "PHP execution is disabled" 403
+
+        # 🌐 Fallback to static
+        try_files {path} {path}/ /index.html
 }
 
 # Refer to the Caddy docs for more information:
