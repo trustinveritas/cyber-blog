@@ -6,9 +6,12 @@ published: 2025-05-25
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Migration from NGINX to Caddy
+# 🚀 Migration from NGINX to Caddy
 
-## Installation
+## 📦 Installation
+
+> Install Caddy using the official instructions:
+> [https://caddyserver.com/docs/install](https://caddyserver.com/docs/install)
 
 ```bash
 sudo apt install -y debian-keyring debian-archive-keyring apt-transport-https curl rsync
@@ -20,7 +23,7 @@ sudo apt install caddy
 
 ---
 
-## Caddy - Config file `/etc/caddy/Caddyfile`
+## ⚙️ Caddy - Config file `/etc/caddy/Caddyfile`
 
 ```bash
 # The Caddyfile is an easy way to configure your Caddy web server.
@@ -85,7 +88,7 @@ blog.salucci.ch {
 # https://caddyserver.com/docs/caddyfile
 ```
 
-### Validate the config
+### ✅ Validate the Config
 
 ```bash
 sudo caddy validate --config /etc/caddy/Caddyfile
@@ -93,7 +96,7 @@ sudo caddy validate --config /etc/caddy/Caddyfile
 
 ---
 
-## Set Up Directory Structure
+## 📁 Set Up Directory Structure
 
 ```bash
 sudo mkdir -p /etc/caddy
@@ -103,7 +106,7 @@ sudo chown -R caddy:caddy /var/www/blog.salucci.ch
 
 ---
 
-## Disable and Remove NGINX
+## 🧹 Disable and Remove NGINX
 
 ```bash
 sudo systemctl stop nginx
