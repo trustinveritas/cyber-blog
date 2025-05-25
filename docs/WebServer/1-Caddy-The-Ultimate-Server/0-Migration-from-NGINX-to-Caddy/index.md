@@ -2,7 +2,7 @@
 title: "0. Migration from NGINX to Caddy"
 authors: [asalucci]
 tags: [HackTheBox, CTF, trustinveritas, alessandro]
-published: 2025-05-26
+published: 2025-05-25
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
