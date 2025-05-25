@@ -30,7 +30,7 @@ jobs:
 
       - name: Success ping to Healthchecks.io
         if: success()
-        run: curl -fsS --retry 2 https://hc-ping.com/966a59d9-3e2d-4c5a-a083-1ef203d21ef1/success || true
+        run: curl -fsS --retry 2 https://hc-ping.com/966a59d9-3e2d-4c5a-a083-1ef203d21ef1 || true
 
       - name: Failure ping to Healthchecks.io
         if: failure()
