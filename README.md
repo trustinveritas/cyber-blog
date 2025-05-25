@@ -1,4 +1,4 @@
-[![Build and Deploy](https://github.com/trustinveritas/cyber-blog/actions/workflows/deploy.yml/badge.svg)](https://github.com/trustinveritas/cyber-blog/actions/workflows/deploy.yml)
+[![Build and Deploy](https://github.com/trustinveritas/cyber-blog/actions/workflows/deploy.yml/badge.svg)](https://github.com/trustinveritas/cyber-blog/actions/workflows/deploy.yml) ![CyberBlog](https://healthchecks.io/badge/55844ef9-0dcf-4d86-b17b-4a3196/e3OFMlzG-2/CyberBlog.svg)
 
 # Website
 
