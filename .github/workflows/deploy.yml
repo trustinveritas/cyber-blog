@@ -22,8 +22,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Lint code
-        run: npm run lint
+      - name: Lint Markdown
+        run: npm run lint-md
+
+      - name: Validate Frontmatter
+        run: npm run lint-frontmatte
 
       - name: Build the project
         run: npm run build
