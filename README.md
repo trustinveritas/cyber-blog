@@ -1,3 +1,5 @@
+[![Build and Deploy](https://github.com/trustinveritas/cyber-blog/actions/workflows/deploy.yml/badge.svg)](https://github.com/trustinveritas/cyber-blog/actions/workflows/deploy.yml)
+
 # Website
 
 This website is built using [Docusaurus](https://docusaurus.io/), a modern static website generator.
