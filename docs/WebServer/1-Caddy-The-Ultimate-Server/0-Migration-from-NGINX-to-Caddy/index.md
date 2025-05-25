@@ -23,6 +23,16 @@ sudo apt install caddy
 ## Caddy - Config file `/etc/caddy/Caddyfile`
 
 ```bash
+# The Caddyfile is an easy way to configure your Caddy web server.
+#
+# Unless the file starts with a global options block, the first
+# uncommented line is always the address of your site.
+#
+# To use your own domain name (with automatic HTTPS), first make
+# sure your domain's A/AAAA DNS records are properly pointed to
+# this machine's public IP, then replace ":80" below with your
+# domain name.
+
 blog.salucci.ch {
     root * /var/www/blog.salucci.ch
     encode gzip
@@ -39,36 +49,41 @@ blog.salucci.ch {
         Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
     }
 
-    # Reverse Proxy for GitHub WebHook
-    @webhook path /webhook*
-    reverse_proxy @webhook 127.0.0.1:5555 {
-        header_up Host {host}
-        header_up X-Real-IP {remote}
+    # ✅ Reverse Proxy for GitHub WebHook (POST allowed)
+    @webhook {
+        path /webhook
+        method POST
+    }
+    handle @webhook {
+        reverse_proxy 127.0.0.1:5555 {
+            header_up Host {host}
+            header_up X-Real-IP {remote}
+        }
     }
 
-    # Restrict HTTP methods to GET and HEAD
+    # 🔒 Restrict HTTP methods globally
     @disallowed_methods {
         not method GET HEAD
     }
-    respond @disallowed_methods "Method Not Allowed" 405
+    handle @disallowed_methods {
+        respond "Method Not Allowed" 405
+    }
 
-    # Deny access to hidden files and directories
+    # ⛔ Deny access to sensitive files
     @hidden_files {
         path /.env* /.git* /.bash* /.cache* /.config* /.* /.*/*
     }
     respond @hidden_files "Access Denied" 403
 
-    # Deny access to sensitive files
     @sensitive_files path_regexp sensitive_files ^.*(\.bak|\.config|\.env|\.git|~)$
     respond @sensitive_files "Access Denied" 403
 
-    # Block PHP execution
     @php_files {
         path *.php
     }
     respond @php_files "PHP execution is disabled" 403
 
-    # Static files fallback
+    # 🌐 Fallback to static
     try_files {path} {path}/ /index.html
 }
 
