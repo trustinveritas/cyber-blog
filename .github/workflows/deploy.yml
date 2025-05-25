@@ -6,27 +6,12 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Start Healthchecks.io ping
+        run: curl -fsS --retry 2 https://hc-ping.com/966a59d9-3e2d-4c5a-a083-1ef203d21ef1/start || true
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build the project
-        run: npm run build
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
       - uses: actions/checkout@v3
 
       - name: Set up Node.js
@@ -41,5 +26,12 @@ jobs:
         run: npm run build
 
       - name: Trigger Webhook to Live Server
-        run: |
-          curl -X POST https://blog.salucci.ch/webhook
+        run: curl -X POST https://blog.salucci.ch/webhook
+
+      - name: Success ping to Healthchecks.io
+        if: success()
+        run: curl -fsS --retry 2 https://hc-ping.com/966a59d9-3e2d-4c5a-a083-1ef203d21ef1 || true
+
+      - name: Failure ping to Healthchecks.io
+        if: failure()
+        run: curl -fsS --retry 2 https://hc-ping.com/966a59d9-3e2d-4c5a-a083-1ef203d21ef1/fail || true
