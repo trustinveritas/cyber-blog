@@ -38,7 +38,6 @@ blog.salucci.ch {
         encode gzip
         file_server
 
-        # Security Headers
         header {
                 Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
                 X-Frame-Options "DENY"
@@ -49,11 +48,8 @@ blog.salucci.ch {
                 Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline';"
         }
 
-        # ✅ Reverse Proxy for GitHub WebHook (POST allowed)
-        @webhook {
-                path /webhook
-                method POST
-        }
+        # ✅ Webhook route
+        @webhook path /webhook
         handle @webhook {
                 reverse_proxy 127.0.0.1:5555 {
                         header_up Host {host}
@@ -61,32 +57,28 @@ blog.salucci.ch {
                 }
         }
 
-        # 🔒 Restrict HTTP methods globally
-        @allowed_post path /webhook
-        @disallowed_methods {
-                not method GET HEAD POST
-                not path /webhook
-        }
-        handle @disallowed_methods {
-                respond "Method Not Allowed" 405
-        }
+        # 🌐 Main site handler
+        handle {
+                @disallowed_methods {
+                        not method GET HEAD
+                }
+                respond @disallowed_methods "Method Not Allowed" 405
 
-        # ⛔ Deny access to sensitive files
-        @hidden_files {
-                path /.env* /.git* /.bash* /.cache* /.config* /.* /.*/*
+                @hidden_files {
+                        path /.env* /.git* /.bash* /.cache* /.config* /.* /.*/*
+                }
+                respond @hidden_files "Access Denied" 403
+
+                @sensitive_files path_regexp sensitive_files ^.*(\.bak|\.config|\.env|\.git|~)$
+                respond @sensitive_files "Access Denied" 403
+
+                @php_files {
+                        path *.php
+                }
+                respond @php_files "PHP execution is disabled" 403
+
+                try_files {path} {path}/ /index.html
         }
-        respond @hidden_files "Access Denied" 403
-
-        @sensitive_files path_regexp sensitive_files ^.*(\.bak|\.config|\.env|\.git|~)$
-        respond @sensitive_files "Access Denied" 403
-
-        @php_files {
-                path *.php
-        }
-        respond @php_files "PHP execution is disabled" 403
-
-        # 🌐 Fallback to static
-        try_files {path} {path}/ /index.html
 }
 
 # Refer to the Caddy docs for more information:
