@@ -1,0 +1,6 @@
+globs: ["**/*.md", "**/*.mdx"]
+config:
+  MD013: false  # Disable line length rule
+  MD041: false  # Allow files without a top-level heading
+  MD007:
+    indent: 2   # Set list indentation to 2 spaces
