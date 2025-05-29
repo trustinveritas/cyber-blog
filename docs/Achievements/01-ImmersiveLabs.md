@@ -11,3 +11,5 @@ categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ## 🎖️ Immersive Labs Badge
 
 ![IncidentResponseBadge](img/IncidentResponseBadge.png)
+
+![Intermediate-Web-App-Hacking](img/Intermediate-Web-App-Hacking.png)
