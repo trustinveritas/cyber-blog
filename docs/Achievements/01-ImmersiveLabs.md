@@ -13,3 +13,5 @@ categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ![IncidentResponseBadge](img/IncidentResponseBadge.png)
 
 ![Intermediate-Web-App-Hacking](img/Intermediate-Web-App-Hacking.png)
+
+![Windows-Forensic-Artifacts](img/Windows-Forensic-Artifacts.png)
