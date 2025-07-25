@@ -6,7 +6,7 @@ published: 2025-07-24
 categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
-# Mirage
+# HackTheBox Writeup - Mirage
 
 ![Mirage](assets/img/Mirage.png)
 
@@ -427,8 +427,6 @@ python3 fake_nats.py
 ![Fake-NATS-Connection-Credentials](assets/img/Fake-NATS-Connection-Credentials.png)
 
 > Successfully intercepted credentials.
-
-![Credentials](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExa3ljc2Q0d3A4bXRnanJuMWJzNWJ3MXMwOTc4aTE4YzJrc2M0NjBkNCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/qM4G18VwHDdjljPi9K/giphy.gif)
 
 ---
 
@@ -1111,8 +1109,6 @@ evil-winrm -i dc01.mirage.htb -r mirage.htb
 
 > ✅ `WinRM shell` as `Administrator` on `dc01.mirage.htb`
 
-![Worke-is-Done](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdXB3cThrMHBwemg1cmpsbms5a3R0MGI5NnJ3MnAxMWJ6d2pxdzd1MiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/UtEUhkfriklonVdweC/giphy.gif)
-
 ### 🏁 Final Step: Capture the `root.txt` Flag
 
 ```bash
@@ -1122,5 +1118,3 @@ cat root.txt
 ```
 
 > 🎯 Objective Complete: **Full Domain Takeover**
-
-![Completed](https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdXB3cThrMHBwemg1cmpsbms5a3R0MGI5NnJ3MnAxMWJ6d2pxdzd1MiZlcD12MV9naWZzX3NlYXJjaCZjdD1n/HLoJUnVVvyJkcGgxsv/giphy.gif)
