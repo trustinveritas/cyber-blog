@@ -9,8 +9,8 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Start Healthchecks.io ping
-        run: curl -fsS --retry 2 https://hc-ping.com/966a59d9-3e2d-4c5a-a083-1ef203d21ef1/start || true
+      - name: Start Healthchecks.io (CI)
+        run: curl -fsS --retry 2 https://hc-ping.com/06ff4b2c-9680-456e-98f0-c7c4e90abf9f/start || true
 
       - uses: actions/checkout@v3
 
@@ -31,10 +31,10 @@ jobs:
                -H "Authorization: Bearer ${{ secrets.DEPLOY_WEBHOOK_TOKEN }}" \
                https://blog.salucci.ch/webhook
 
-      - name: Success ping to Healthchecks.io
+      - name: Success ping to Healthchecks.io (CI)
         if: success()
-        run: curl -fsS --retry 2 https://hc-ping.com/966a59d9-3e2d-4c5a-a083-1ef203d21ef1 || true
+        run: curl -fsS --retry 2 https://hc-ping.com/06ff4b2c-9680-456e-98f0-c7c4e90abf9f || true
 
-      - name: Failure ping to Healthchecks.io
+      - name: Failure ping to Healthchecks.io (CI)
         if: failure()
-        run: curl -fsS --retry 2 https://hc-ping.com/966a59d9-3e2d-4c5a-a083-1ef203d21ef1/fail || true
+        run: curl -fsS --retry 2 https://hc-ping.com/06ff4b2c-9680-456e-98f0-c7c4e90abf9f/fail || true
