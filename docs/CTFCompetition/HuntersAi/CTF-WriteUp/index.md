@@ -369,7 +369,7 @@ During their privilege escalation phase, the attacker executed a known Windows D
 
 ![RunDLL32-Invoke-MiniDumpW-over-comsvcsDLL](img/RunDLL32-Invoke-MiniDumpW-over-comsvcsDLL.png)
 
-### 🔍 Explanation:
+### 🔍 Explanation
 
 The command:
 
