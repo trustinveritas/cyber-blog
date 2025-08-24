@@ -1,0 +1,9 @@
+{
+    "label": "CTF Competition",
+    "position": 2,
+    "link": {
+      "type": "generated-index",
+      "title": "Table of Contents",
+      "description": "Browse through all available CTF Competition Write-ups."
+    }
+  }
