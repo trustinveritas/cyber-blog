@@ -14,6 +14,7 @@ categories: ["SOC", "Analyst", "Write", "Up", "HackTheBox"]
 ---
 
 ## 📌 What is Shodan?
+
 Shodan is a publicly available search engine which scans the entire Internet for a limited number of services and enumerates any discovered services by their banner responses. It indexes that data and makes it searchable.
 
 - **Indexed fields:** data, IP, port, org, host, location.country_code  
