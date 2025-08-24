@@ -66,12 +66,12 @@ const config: Config = {
 
   themeConfig: {
     // Replace with your project's social card
-    image: 'img/docusaurus-social-card.jpg',
+    image: 'static/img/this-is-it.png',
     navbar: {
       title: 'Cyber Blog',
       logo: {
         alt: 'My Site Logo',
-        src: 'img/logo.png',
+        src: 'static/img/logo.png',
       },
       items: [
         {
